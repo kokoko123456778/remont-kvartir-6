@@ -1047,14 +1047,26 @@ static void drawLine(int x0, int y0, int x1, int y1, u32 c, int th) {
 enum { R_OUT, R_HALL, R_LIV, R_KIT, R_BATH, NROOM };
 static const char *ROOMN[NROOM] = {"УЛИЦА", "КОРИДОР", "КОМНАТА", "КУХНЯ", "ВАННАЯ"};
 enum { MW = 18, MH = 14 };
-struct Layout { const char *name; int price; const char *rows[MH]; };
-// H коридор, L комната, K кухня, B ванная, пробел - снаружи; вход - первая клетка коридора у края
+struct Layout { const char *name; const char *rows[MH]; };
+// H коридор, L комната, K кухня, B ванная, пробел - снаружи; вход - первая клетка коридора у края.
+// Планировки идут по возрастанию площади; цена считается от площади (см. genOffers).
 static const Layout LAYOUTS[] = {
-  {"ОДНУШКА В ХРУЩЁВКЕ", 2900000, {"                  ", " LLLLLKKKKK       ", " LLLLLKKKKK       ", " LLLLLKKKKK       ", " LLLLLKKKKK       ", " LLLLLHHHHH       ", " LLLLLHHHHH       ", "      BBBB        ", "      BBBB        ", "                  ", "                  ", "                  ", "                  ", "                  "}},
-  {"ДВУШКА У ПАРКА", 4700000, {"                  ", " LLLLLLKKKKK      ", " LLLLLLKKKKK      ", " LLLLLLKKKKK      ", " LLLLLLKKKKK      ", " HHHHHHHHHHH      ", " HHHHHHHHHHH      ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLL           ", "                  ", "                  ", "                  "}},
-  {"ТРЁШКА В ЦЕНТРЕ", 7400000, {"                  ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " HHHHHHHHHHHHHHHH ", " HHHHHHHHHHHHHHHH ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLL           ", "                  ", "                  ", "                  "}},
+  {"СТУДИЯ У МЕТРО", {"                  ", " LLLLLKKK         ", " LLLLLKKK         ", " LLLLLKKK         ", " LLLLLHHH         ", "      HHH         ", "      BBB         ", "      BBB         ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"ОДНУШКА-ХРУЩЁВКА", {"                  ", " LLLLLKKKK        ", " LLLLLKKKK        ", " LLLLLKKKK        ", " LLLLLHHHH        ", " LLLLLHHHH        ", "      BBBB        ", "      BBBB        ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"ОДНУШКА НОВАЯ", {"                  ", " LLLLLKKKKK       ", " LLLLLKKKKK       ", " LLLLLKKKKK       ", " LLLLLKKKKK       ", " LLLLLHHHHH       ", " LLLLLHHHHH       ", "      BBBB        ", "      BBBB        ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"ДВУШКА-КОРИДОР", {"                  ", " HHLLLLL          ", " HHLLLLL          ", " HHLLLLL          ", " HHLLLLL          ", " HHBBB            ", " HHBBB            ", " HHKKKK           ", " HHKKKK           ", " HHKKKK           ", " HHLLLLL          ", " HHLLLLL          ", " HHLLLLL          ", "                  "}},
+  {"ДВУШКА У ПАРКА", {"                  ", " LLLLLLKKKKK      ", " LLLLLLKKKKK      ", " LLLLLLKKKKK      ", " LLLLLLKKKKK      ", " HHHHHHHHHHH      ", " HHHHHHHHHHH      ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLL           ", "                  ", "                  ", "                  "}},
+  {"ТРЁШКА-РАСПАШОНКА", {"                  ", " LLLLLLHHKKKKK    ", " LLLLLLHHKKKKK    ", " LLLLLLHHKKKKK    ", " LLLLLLHHKKKKK    ", "       HHBBBB     ", " LLLLLLHHBBBB     ", " LLLLLLHHLLLLL    ", " LLLLLLHHLLLLL    ", " LLLLLLHHLLLLL    ", "       HHLLLLL    ", "                  ", "                  ", "                  "}},
+  {"ТРЁШКА В ЦЕНТРЕ", {"                  ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " HHHHHHHHHHHHHHHH ", " HHHHHHHHHHHHHHHH ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLLBBBB       ", " LLLLLL           ", "                  ", "                  ", "                  "}},
+  {"ЧЕТВЁРТКА-ПЕНТХАУС", {"                  ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " LLLLLLKKKKKLLLLL ", " HHHHHHHHHHHHHHHH ", " HHHHHHHHHHHHHHHH ", " LLLLLLBBBBLLLLLL ", " LLLLLLBBBBLLLLLL ", " LLLLLLBBBBLLLLLL ", " LLLLLL    LLLLLL ", " LLLLLL    LLLLLL ", "                  "}},
+  {"ГОСТИНКА", {"                  ", " LLLLKK           ", " LLLLKK           ", " LLLLHH           ", " LLLLHH           ", "     BB           ", "     BB           ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"ДВУШКА-ХРУЩЁВКА", {"                  ", " LLLLLHLLLL       ", " LLLLLHLLLL       ", " LLLLLHLLLL       ", " LLLLLHLLLL       ", " KKKKHHHBBB       ", " KKKKHHHBBB       ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"ЕВРОДВУШКА", {"                  ", " KKKKKKKKLLLLL    ", " KKKKKKKKLLLLL    ", " KKKKKKKKLLLLL    ", " KKKKKKKKLLLLL    ", " HHHHHHHHHHHHH    ", " BBB              ", " BBB              ", "                  ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"ТРЁШКА ПАНЕЛЬНАЯ", {"                  ", " LLLLLKKKKLLLLL   ", " LLLLLKKKKLLLLL   ", " LLLLLKKKKLLLLL   ", " LLLLLKKKKLLLLL   ", " HHHHHHHHHHHHHH   ", " LLLLLLBBB        ", " LLLLLLBBB        ", " LLLLLL           ", "                  ", "                  ", "                  ", "                  ", "                  "}},
+  {"СТАЛИНСКАЯ ТРЁШКА", {"                  ", " LLLLLLLHHKKKKKK  ", " LLLLLLLHHKKKKKK  ", " LLLLLLLHHKKKKKK  ", " LLLLLLLHHKKKKKK  ", " LLLLLLLHHBBBB    ", "        HHBBBB    ", " LLLLLLLHHBBBB    ", " LLLLLLLHHLLLLLL  ", " LLLLLLLHHLLLLLL  ", " LLLLLLLHHLLLLLL  ", " LLLLLLLHHLLLLLL  ", "        HH        ", "                  "}},
+  {"ПЯТИКОМНАТНАЯ", {"                  ", " LLLLLKKKKKKLLLLL ", " LLLLLKKKKKKLLLLL ", " LLLLLKKKKKKLLLLL ", " LLLLLKKKKKKLLLLL ", " HHHHHHHHHHHHHHHH ", " HHHHHHHHHHHHHHHH ", " LLLLLBBBLLLLBBBB ", " LLLLLBBBLLLLBBBB ", " LLLLLBBBLLLLBBBB ", " LLLLL   LLLL     ", " LLLLL   LLLL     ", " LLLLL   LLLL     ", "                  "}},
 };
-static const int NLAYOUT = 3;
+static const int NLAYOUT = sizeof(LAYOUTS) / sizeof(LAYOUTS[0]);
 static int cellR[MW][MH];                          // комната клетки
 // грани стен: стена между клеткой (x,z) и соседом справа (+x) или снизу (+z)
 struct Face { unsigned char wallpaper, paint, window, putty, paper; };   // старые обои (1), краска (0 нет), окно, зашпаклёвано, новые обои (0 нет)
@@ -1068,28 +1080,112 @@ static int layoutId = 0, entX = 0, entZ = 0;                  // вход (кл�
 static float binX = 0, binZ = 0;
 static int stainsInit = 1;                                    // сколько пятен было при покупке                              // мусорный контейнер за дверью
 // краски
-static const u32 PAINT[] = {0, RGB(235, 232, 225), RGB(170, 205, 230), RGB(200, 230, 190), RGB(245, 215, 170), RGB(230, 180, 180), RGB(120, 130, 150), RGB(70, 72, 80)};
-static const char *PAINTN[] = {"", "БЕЛАЯ", "ГОЛУБАЯ", "МЯТНАЯ", "ПЕСОЧНАЯ", "РОЗОВАЯ", "ГРАФИТ", "ТЁМНАЯ"};
-static const int NPAINT = 8;
+// стили ремонта: за единый стиль покупатели платят больше
+enum { ST_NONE, ST_LOFT, ST_CLASSIC, ST_SCANDI, ST_MODERN, NSTYLE };
+static const char *STYLEN[NSTYLE] = {"БАЗОВАЯ", "ЛОФТ", "КЛАССИКА", "СКАНДИ", "МОДЕРН"};
+static const u32 STYLEC[NSTYLE] = {RGB(120, 126, 140), RGB(185, 100, 65), RGB(190, 160, 80), RGB(120, 185, 225), RGB(165, 140, 200)};
+static const u32 PAINT[] = {0, RGB(235, 232, 225), RGB(170, 205, 230), RGB(200, 230, 190), RGB(245, 215, 170), RGB(230, 180, 180), RGB(120, 130, 150), RGB(70, 72, 80),
+  RGB(185, 105, 75), RGB(130, 50, 60), RGB(150, 160, 120), RGB(215, 210, 225)};
+static const char *PAINTN[] = {"", "БЕЛАЯ", "ГОЛУБАЯ", "МЯТНАЯ", "ПЕСОЧНАЯ", "РОЗОВАЯ", "ГРАФИТ", "ТЁМНАЯ", "ТЕРРАКОТА", "БОРДО", "ОЛИВКА", "ЛАВАНДА"};
+static const int PAINTS[] = {0, ST_SCANDI, ST_SCANDI, ST_SCANDI, ST_CLASSIC, ST_CLASSIC, ST_MODERN, ST_LOFT, ST_LOFT, ST_CLASSIC, ST_LOFT, ST_MODERN};
+static const int NPAINT = 12;
 // новые обои: узор и два цвета
-struct Paper { const char *name; int kind; u32 a, b; };   // kind: 0 полоска, 1 цветы, 2 ромбы, 3 кирпич, 4 дерево, 5 однотонные с фактурой
+struct Paper { const char *name; int kind; u32 a, b; int style; };   // kind: 0 полоска, 1 цветы, 2 ромбы, 3 кирпич, 4 дерево, 5 однотонные с фактурой
 static const Paper PAPERS[] = { {"", 0, 0, 0},
-  {"ПОЛОСКА", 0, RGB(232, 226, 210), RGB(205, 195, 170)}, {"ЦВЕТЫ", 1, RGB(236, 240, 232), RGB(200, 120, 140)}, {"РОМБЫ", 2, RGB(210, 220, 235), RGB(150, 170, 205)},
-  {"КИРПИЧ", 3, RGB(170, 95, 70), RGB(215, 205, 190)}, {"ДЕРЕВО", 4, RGB(170, 125, 85), RGB(135, 95, 60)}, {"ЛЁН", 5, RGB(220, 214, 200), RGB(205, 198, 182)},
-  {"ИЗУМРУД", 2, RGB(70, 110, 95), RGB(200, 180, 120)}, {"ГРАФИТ", 5, RGB(80, 84, 92), RGB(70, 74, 82)} };
+  {"ПОЛОСКА", 0, RGB(232, 226, 210), RGB(205, 195, 170), ST_CLASSIC}, {"ЦВЕТЫ", 1, RGB(236, 240, 232), RGB(200, 120, 140), ST_CLASSIC}, {"РОМБЫ", 2, RGB(210, 220, 235), RGB(150, 170, 205), ST_MODERN},
+  {"КИРПИЧ", 3, RGB(170, 95, 70), RGB(215, 205, 190), ST_LOFT}, {"ДЕРЕВО", 4, RGB(170, 125, 85), RGB(135, 95, 60), ST_SCANDI}, {"ЛЁН", 5, RGB(220, 214, 200), RGB(205, 198, 182), ST_SCANDI},
+  {"ИЗУМРУД", 2, RGB(70, 110, 95), RGB(200, 180, 120), ST_CLASSIC}, {"ГРАФИТ", 5, RGB(80, 84, 92), RGB(70, 74, 82), ST_MODERN},
+  {"БЕТОН", 5, RGB(160, 160, 156), RGB(145, 145, 142), ST_LOFT}, {"ГЕОМЕТРИЯ", 2, RGB(238, 238, 240), RGB(60, 62, 70), ST_MODERN},
+  {"ВЕНЗЕЛЯ", 1, RGB(225, 205, 160), RGB(150, 110, 60), ST_CLASSIC}, {"ЛИСТЬЯ", 1, RGB(240, 244, 238), RGB(110, 160, 110), ST_SCANDI} };
 static const int NPAPER = sizeof(PAPERS) / sizeof(PAPERS[0]);
 static const int COST_PUTTY = 300, COST_PAPER = 900;
 // мебель
-struct Furn { const char *name; int price, room, value; };
+// shape - какую модель рисовать (0 - свою), a/b - свои цвета обивки/корпуса, old - старьё из «бабушкиной» квартиры (не продаётся в магазине)
+struct Furn { const char *name; int price, room, value, style, shape; u32 a, b; int old; };
+enum { FU_SOFA = 1, FU_BED, FU_TV, FU_WARD, FU_FRIDGE, FU_STOVE, FU_TABLE, FU_BATH, FU_SINK, FU_WC, FU_FLOWER, FU_RUG, FU_LAMP, FU_ARM, FU_COFFEE, FU_BOOKS, FU_KITCH, FU_WASH,
+  FU_CRIB = 35, FU_DESK = 36, FU_SIDEBOARD = 38, FU_OLDTV = 39,
+  FU_CORNER = 41, FU_BEANBAG, FU_DRESSER, FU_NIGHT, FU_BUNK, FU_VANITYT, FU_PIANO, FU_AQUA, FU_FIRE, FU_MONSTERA, FU_HANG, FU_GAMER, FU_TREAD, FU_AUDIO,
+  FU_ROUND, FU_BAR, FU_ISLAND, FU_DISH, FU_OVEN, FU_SHOWER, FU_TOWEL, FU_JACUZZI, FU_COAT, FU_MIRROR, FU_COUPE, FU_KIDS, FU_BIKE, FU_CHESTER, FU_CONSOLE, FU_LADDER };
 static const Furn FURN[] = { {"", 0, 0, 0},
   {"ДИВАН", 35000, R_LIV, 60000}, {"КРОВАТЬ", 40000, R_LIV, 65000}, {"ТУМБА С ТВ", 30000, R_LIV, 45000}, {"ШКАФ", 25000, R_HALL, 35000},
   {"ХОЛОДИЛЬНИК", 45000, R_KIT, 60000}, {"ПЛИТА", 30000, R_KIT, 45000}, {"СТОЛ СО СТУЛЬЯМИ", 20000, R_KIT, 30000},
   {"ВАННА", 40000, R_BATH, 60000}, {"РАКОВИНА", 15000, R_BATH, 25000}, {"УНИТАЗ", 15000, R_BATH, 25000}, {"ЦВЕТОК", 3000, 0, 6000},
-  {"КОВЁР", 8000, 0, 14000}, {"ТОРШЕР", 7000, 0, 12000}, {"КРЕСЛО", 18000, R_LIV, 28000}, {"ЖУРНАЛЬНЫЙ СТОЛИК", 9000, R_LIV, 15000},
-  {"КНИЖНЫЙ ШКАФ", 16000, R_LIV, 26000}, {"КУХОННЫЙ ШКАФ", 28000, R_KIT, 42000}, {"СТИРАЛЬНАЯ МАШИНА", 30000, R_BATH, 42000} };
-static bool furnSolid(int it) { return it != 12; }   // по ковру можно ходить
+  {"КОВЁР", 8000, 0, 14000, ST_CLASSIC}, {"ТОРШЕР", 7000, 0, 12000}, {"КРЕСЛО", 18000, R_LIV, 28000}, {"ЖУРНАЛЬНЫЙ СТОЛИК", 9000, R_LIV, 15000},
+  {"КНИЖНЫЙ ШКАФ", 16000, R_LIV, 26000}, {"КУХОННЫЙ ШКАФ", 28000, R_KIT, 42000}, {"СТИРАЛЬНАЯ МАШИНА", 30000, R_BATH, 42000},
+  // 19..34: стильная мебель (те же модели, другие цвета)
+  {"КОЖАНЫЙ ДИВАН", 55000, R_LIV, 85000, ST_LOFT, FU_SOFA, RGB(110, 64, 38), RGB(86, 48, 28)},
+  {"МЕТАЛЛ. СТЕЛЛАЖ", 22000, R_LIV, 34000, ST_LOFT, FU_BOOKS, RGB(38, 38, 42), RGB(60, 60, 66)},
+  {"ЛОФТ-ШКАФ", 30000, R_HALL, 45000, ST_LOFT, FU_WARD, RGB(92, 74, 58)},
+  {"ДИВАН КЛАССИКА", 48000, R_LIV, 75000, ST_CLASSIC, FU_SOFA, RGB(135, 40, 52), RGB(108, 30, 40)},
+  {"КРЕСЛО БЕРЖЕР", 26000, R_LIV, 40000, ST_CLASSIC, FU_ARM, RGB(62, 108, 72), RGB(46, 86, 56)},
+  {"ШКАФ КЛАССИКА", 34000, R_HALL, 50000, ST_CLASSIC, FU_WARD, RGB(118, 76, 44)},
+  {"СКАНДИ-ДИВАН", 42000, R_LIV, 66000, ST_SCANDI, FU_SOFA, RGB(188, 190, 194), RGB(164, 166, 171)},
+  {"КРЕСЛО СКАНДИ", 20000, R_LIV, 32000, ST_SCANDI, FU_ARM, RGB(226, 176, 62), RGB(196, 148, 46)},
+  {"БЕЛЫЙ СТЕЛЛАЖ", 18000, R_LIV, 29000, ST_SCANDI, FU_BOOKS, RGB(240, 238, 232), RGB(222, 214, 200)},
+  {"МОДЕРН-ДИВАН", 50000, R_LIV, 78000, ST_MODERN, FU_SOFA, RGB(72, 74, 82), RGB(56, 58, 66)},
+  {"КРОВАТЬ МОДЕРН", 52000, R_LIV, 80000, ST_MODERN, FU_BED, RGB(78, 78, 86), RGB(205, 205, 212)},
+  {"КУХНЯ ГЛЯНЕЦ", 40000, R_KIT, 60000, ST_MODERN, FU_KITCH, RGB(62, 64, 72), RGB(230, 230, 232)},
+  {"ТВ-ПАНЕЛЬ ГЛЯНЕЦ", 38000, R_LIV, 56000, ST_MODERN, FU_TV, RGB(240, 240, 244)},
+  {"КУХНЯ ДЕРЕВО", 34000, R_KIT, 50000, ST_CLASSIC, FU_KITCH, RGB(150, 108, 68), RGB(90, 60, 40)},
+  {"КУХНЯ СКАНДИ", 32000, R_KIT, 48000, ST_SCANDI, FU_KITCH, RGB(246, 246, 242), RGB(210, 175, 125)},
+  {"КУХНЯ ЛОФТ", 36000, R_KIT, 54000, ST_LOFT, FU_KITCH, RGB(56, 56, 60), RGB(150, 100, 62)},
+  // 35, 36: новые модели (их ждут покупатели)
+  {"ДЕТСКАЯ КРОВАТКА", 18000, R_LIV, 30000},
+  {"РАБОЧИЙ СТОЛ С ПК", 25000, R_LIV, 36000},
+  // 37..40: старьё (в «бабушкиных» квартирах, вынести руками)
+  {"СТАРЫЙ ДИВАН", 3000, R_LIV, 0, ST_NONE, FU_SOFA, RGB(128, 100, 72), RGB(108, 84, 60), 1},
+  {"СТАРЫЙ СЕРВАНТ", 4000, R_LIV, 0, ST_NONE, 0, 0, 0, 1},
+  {"СТАРЫЙ ТЕЛЕВИЗОР", 2000, R_LIV, 0, ST_NONE, 0, 0, 0, 1},
+  {"СТАРЫЙ ШКАФ", 3000, R_HALL, 0, ST_NONE, FU_WARD, RGB(132, 96, 62), 0, 1},
+  // 41..70: новые модели
+  {"УГЛОВОЙ ДИВАН", 62000, R_LIV, 92000}, {"КРЕСЛО-МЕШОК", 6000, 0, 11000}, {"КОМОД", 16000, 0, 25000}, {"ПРИКРОВАТНАЯ ТУМБА", 7000, R_LIV, 12000},
+  {"ДВУХЪЯРУСНАЯ КРОВАТЬ", 38000, R_LIV, 58000}, {"ТУАЛЕТНЫЙ СТОЛИК", 19000, R_LIV, 30000}, {"ПИАНИНО", 70000, R_LIV, 100000, ST_CLASSIC}, {"АКВАРИУМ", 26000, R_LIV, 40000},
+  {"ЭЛЕКТРОКАМИН", 45000, R_LIV, 68000, ST_CLASSIC}, {"МОНСТЕРА В КАДКЕ", 9000, 0, 16000, ST_SCANDI}, {"ПОДВЕСНОЕ КРЕСЛО", 24000, R_LIV, 38000, ST_SCANDI},
+  {"ИГРОВОЙ УГОЛОК", 60000, R_LIV, 85000, ST_MODERN}, {"БЕГОВАЯ ДОРОЖКА", 48000, R_LIV, 62000}, {"ВИНИЛ И КОЛОНКИ", 30000, R_LIV, 45000, ST_LOFT},
+  {"КРУГЛЫЙ СТОЛ", 26000, R_KIT, 40000}, {"БАРНАЯ СТОЙКА", 30000, R_KIT, 46000, ST_LOFT}, {"КУХОННЫЙ ОСТРОВ", 52000, R_KIT, 78000, ST_MODERN},
+  {"ПОСУДОМОЙКА", 32000, R_KIT, 46000}, {"ПЕНАЛ С ДУХОВКОЙ", 36000, R_KIT, 52000}, {"ДУШЕВАЯ КАБИНА", 38000, R_BATH, 58000}, {"ПОЛОТЕНЦЕСУШИТЕЛЬ", 9000, R_BATH, 15000},
+  {"ДЖАКУЗИ", 95000, R_BATH, 140000, ST_MODERN}, {"ВЕШАЛКА С ОБУВНИЦЕЙ", 12000, R_HALL, 19000}, {"ЗЕРКАЛО В ПОЛ", 9000, 0, 15000}, {"ШКАФ-КУПЕ", 42000, R_HALL, 62000, ST_MODERN},
+  {"ДЕТСКИЙ УГОЛОК", 15000, R_LIV, 25000}, {"ВЕЛОСИПЕД НА СТЕНЕ", 14000, 0, 20000, ST_LOFT}, {"ДИВАН ЧЕСТЕРФИЛД", 58000, R_LIV, 88000, ST_CLASSIC},
+  {"КОНСОЛЬ С ЗЕРКАЛОМ", 14000, R_HALL, 22000, ST_CLASSIC}, {"СТЕЛЛАЖ-ЛЕСЕНКА", 9000, 0, 15000, ST_SCANDI},
+  // 71..87: те же новые модели в стилях
+  {"КОМОД ЛОФТ", 21000, 0, 33000, ST_LOFT, FU_DRESSER, RGB(70, 52, 40), RGB(30, 30, 32)}, {"КОМОД КЛАССИКА", 24000, 0, 37000, ST_CLASSIC, FU_DRESSER, RGB(120, 72, 42), RGB(210, 180, 90)},
+  {"КОМОД СКАНДИ", 19000, 0, 30000, ST_SCANDI, FU_DRESSER, RGB(244, 242, 236), RGB(200, 160, 110)},
+  {"УГЛОВОЙ ЛОФТ", 72000, R_LIV, 108000, ST_LOFT, FU_CORNER, RGB(120, 70, 40), RGB(92, 52, 30)}, {"УГЛОВОЙ МОДЕРН", 70000, R_LIV, 105000, ST_MODERN, FU_CORNER, RGB(70, 72, 80), RGB(52, 54, 62)},
+  {"УГЛОВОЙ СКАНДИ", 66000, R_LIV, 99000, ST_SCANDI, FU_CORNER, RGB(214, 204, 186), RGB(190, 180, 162)},
+  {"ОБЕДЕННЫЙ СКАНДИ", 30000, R_KIT, 46000, ST_SCANDI, FU_ROUND, RGB(246, 246, 242), RGB(205, 170, 120)}, {"ОБЕДЕННЫЙ КЛАССИКА", 34000, R_KIT, 52000, ST_CLASSIC, FU_ROUND, RGB(130, 80, 46), RGB(95, 58, 34)},
+  {"ТУМБА МОДЕРН", 10000, R_LIV, 16000, ST_MODERN, FU_NIGHT, RGB(60, 62, 70), RGB(220, 220, 225)}, {"ТУМБА СКАНДИ", 9000, R_LIV, 15000, ST_SCANDI, FU_NIGHT, RGB(240, 238, 232), RGB(200, 160, 110)},
+  {"ДУШЕВАЯ ЛОФТ", 44000, R_BATH, 66000, ST_LOFT, FU_SHOWER, RGB(30, 30, 32)}, {"ВЕШАЛКА СКАНДИ", 14000, R_HALL, 22000, ST_SCANDI, FU_COAT, RGB(225, 200, 160), RGB(150, 170, 160)},
+  {"ТУАЛЕТНЫЙ КЛАССИКА", 26000, R_LIV, 40000, ST_CLASSIC, FU_VANITYT, RGB(245, 238, 225), RGB(200, 160, 70)}, {"МЕШОК МОДЕРН", 8000, 0, 13000, ST_MODERN, FU_BEANBAG, RGB(60, 62, 72)},
+  {"БАРНАЯ МОДЕРН", 36000, R_KIT, 54000, ST_MODERN, FU_BAR, RGB(236, 236, 240), RGB(60, 62, 70)}, {"БИОКАМИН МОДЕРН", 52000, R_LIV, 78000, ST_MODERN, FU_FIRE, RGB(50, 52, 58), RGB(30, 30, 34)},
+  {"КОНСОЛЬ ЛОФТ", 15000, R_HALL, 23000, ST_LOFT, FU_CONSOLE, RGB(40, 40, 44), RGB(40, 40, 44)} };
 static const int NFURN = sizeof(FURN) / sizeof(FURN[0]);
+static_assert(sizeof(FURN) / sizeof(FURN[0]) == 88, "FURN ids"); static_assert(FU_LADDER == 70, "FU ids");
+static int furnShape(int it) { return it <= 0 || it >= NFURN ? 0 : FURN[it].shape ? FURN[it].shape : it; }
+static bool furnSolid(int it) { return furnShape(it) != FU_RUG; }   // по ковру можно ходить
+static int furnAlias(int sh) { switch (sh) { case FU_CORNER: case FU_CHESTER: return FU_SOFA; case FU_BUNK: return FU_BED; case FU_SHOWER: case FU_JACUZZI: return FU_BATH; case FU_COUPE: return FU_WARD; case FU_BEANBAG: case FU_HANG: return FU_ARM; case FU_ROUND: case FU_BAR: return FU_TABLE; case FU_ISLAND: return FU_KITCH; case FU_GAMER: return FU_DESK; case FU_MONSTERA: return FU_FLOWER; case FU_LADDER: return FU_BOOKS; default: return sh; } }
 static const int COST_PAINT = 600, COST_FLOOR_LAM = 2500, COST_FLOOR_TILE = 3500;
+struct FloorT { const char *name; int cost; bool tile; u32 a, b; int style; bool prem; };   // покрытие пола: название, цена за клетку, плитка ли, два цвета
+static const FloorT FLOORS[] = { {"", 0, false, 0, 0},
+  {"ЛАМИНАТ", 2500, false, RGB(190, 145, 95), RGB(176, 132, 86)}, {"ПАРКЕТ", 4500, false, RGB(140, 95, 60), RGB(125, 82, 50), ST_CLASSIC, true},
+  {"СВЕТЛЫЙ ДУБ", 3000, false, RGB(214, 185, 140), RGB(204, 174, 128), ST_SCANDI}, {"СЕРЫЙ ЛАМИНАТ", 2800, false, RGB(165, 165, 170), RGB(152, 152, 158), ST_MODERN},
+  {"ПЛИТКА БЕЛАЯ", 3500, true, RGB(225, 228, 232), RGB(205, 210, 216)}, {"ПЛИТКА ТЁМНАЯ", 3800, true, RGB(84, 88, 98), RGB(70, 74, 84), ST_MODERN, true},
+  {"ЛИНОЛЕУМ", 1500, false, RGB(150, 152, 138), RGB(140, 142, 128)}, {"ВЕНГЕ", 3500, false, RGB(78, 56, 44), RGB(66, 46, 36), ST_CLASSIC, true},
+  {"ДОСКА ЛОФТ", 3800, false, RGB(112, 82, 58), RGB(96, 70, 50), ST_LOFT, true}, {"КЕРАМОГРАНИТ", 4200, true, RGB(170, 168, 162), RGB(155, 153, 148), ST_LOFT, true},
+  {"БЕЛЁНЫЙ ДУБ", 3600, false, RGB(232, 222, 205), RGB(222, 210, 192), ST_SCANDI, true}, {"МРАМОР", 5500, true, RGB(240, 238, 235), RGB(225, 222, 218), ST_MODERN, true} };
+static const int NFLOOR = sizeof(FLOORS) / sizeof(FLOORS[0]);
+// в каком состоянии квартира, какой дом, какой район
+enum { CO_NORMAL, CO_FIRE, CO_FLOOD, CO_GRANNY, CO_BARE, NCOND };
+static const char *CONDN[NCOND] = {"УБИТАЯ", "ПОСЛЕ ПОЖАРА", "ПОСЛЕ ПОТОПА", "БАБУШКИНА", "БЕЗ ОТДЕЛКИ"};
+static const u32 CONDC[NCOND] = {RGB(220, 190, 150), RGB(255, 130, 90), RGB(120, 190, 255), RGB(220, 170, 230), RGB(190, 190, 190)};
+static const float CONDK[NCOND] = {1.0f, 0.84f, 0.88f, 0.93f, 0.96f};       // скидка при покупке
+enum { HO_KHRU, HO_PANEL, HO_STALIN, HO_NEW, NHOUSE };
+static const char *HOUSEN[NHOUSE] = {"ХРУЩЁВКА", "ПАНЕЛЬКА", "СТАЛИНКА", "НОВОСТРОЙКА"};
+static const float HOUSEK[NHOUSE] = {0.85f, 1.0f, 1.3f, 1.18f};
+enum { DI_CENTER, DI_SLEEP, DI_EDGE, NDIST };
+static const char *DISTN[NDIST] = {"ЦЕНТР", "СПАЛЬНЫЙ РАЙОН", "ОКРАИНА"};
+static const float DISTK[NDIST] = {1.3f, 1.0f, 0.82f};
+static unsigned flatSeed = 0;
+static int flatCond = CO_NORMAL, flatHouse = HO_PANEL, flatDist = DI_SLEEP, oldInit = 0;
 static int money = 3600000, flats = 0, carried = 0, flatBuy = 0, spent = 0;
 static bool owned = false;
 static char msg[128] = ""; static float msgT = 0;
@@ -1102,14 +1198,19 @@ static void addDoor(int a, int b) {                // дверь между дв
     if (z + 1 < MH && ((cellR[x][z] == a && cellR[x][z + 1] == b) || (cellR[x][z] == b && cellR[x][z + 1] == a))) { doorZ[x][z + 1] = true; return; }
   }
 }
+static bool trashOn(int x, int z);
 static unsigned rng = 1;
 static int rnd(int n) { rng = rng * 1103515245u + 12345u; return (int)((rng >> 16) % (unsigned)n); }
+// старые обои: 1 обычные, 2 обгоревшие, 3 с плесенью, 0 - голый бетон (новостройка)
+static unsigned char oldPaper() { int r = rnd(100); return flatCond == CO_BARE ? 0 : flatCond == CO_FIRE ? (r < 70 ? 2 : 1) : flatCond == CO_FLOOD ? (r < 45 ? 3 : 1) : 1; }
 static void buildFlat(int id, unsigned seed) {
   layoutId = id; rng = seed; trash.clear(); carried = 0; spent = 0; entX = entZ = 0;
   const Layout &L = LAYOUTS[id];
   for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) {
     char c = L.rows[z][x]; cellR[x][z] = c == 'H' ? R_HALL : c == 'L' ? R_LIV : c == 'K' ? R_KIT : c == 'B' ? R_BATH : R_OUT;
-    Cell &ce = cells[x][z]; ce.stain = cellR[x][z] && rnd(100) < 45; ce.floor = 0; ce.furn = 0; ce.frot = 0;
+    Cell &ce = cells[x][z]; ce.floor = 0; ce.furn = 0; ce.frot = 0; int r = rnd(100);
+    ce.stain = !cellR[x][z] ? 0 : flatCond == CO_FIRE ? (r < 50 ? 2 : r < 60 ? 1 : 0) : flatCond == CO_FLOOD ? (r < 35 ? 3 : r < 50 ? 1 : 0)
+             : flatCond == CO_BARE ? (r < 12 ? 1 : 0) : flatCond == CO_GRANNY ? (r < 30 ? 1 : 0) : (r < 45 ? 1 : 0);
   }
   memset(wallX, 0, sizeof wallX); memset(wallZ, 0, sizeof wallZ); memset(doorX, 0, sizeof doorX); memset(doorZ, 0, sizeof doorZ);
   memset(fX, 0, sizeof fX); memset(fZ, 0, sizeof fZ);
@@ -1135,38 +1236,113 @@ static void buildFlat(int id, unsigned seed) {
   }
   // стороны стен: в комнатах - старые обои; на улицу - иногда окна
   for (int z = 0; z < MH; z++) for (int x = 0; x <= MW; x++) if (wallX[x][z] && !doorX[x][z]) for (int s = 0; s < 2; s++) {
-    int cx = s == 0 ? x - 1 : x; if (!inRoom(cx, z)) continue; fX[x][z][s].wallpaper = 1;
+    int cx = s == 0 ? x - 1 : x; if (!inRoom(cx, z)) continue; fX[x][z][s].wallpaper = oldPaper();
     int other = s == 0 ? (x < MW ? cellR[x][z] : 0) : (x > 0 ? cellR[x - 1][z] : 0); if (other == R_OUT && cellR[cx][z] != R_BATH && rnd(100) < 40) fX[x][z][s].window = 1; }
   for (int x = 0; x < MW; x++) for (int z = 0; z <= MH; z++) if (wallZ[x][z] && !doorZ[x][z]) for (int s = 0; s < 2; s++) {
-    int cz = s == 0 ? z - 1 : z; if (!inRoom(x, cz)) continue; fZ[x][z][s].wallpaper = 1;
+    int cz = s == 0 ? z - 1 : z; if (!inRoom(x, cz)) continue; fZ[x][z][s].wallpaper = oldPaper();
     int other = s == 0 ? (z < MH ? cellR[x][z] : 0) : (z > 0 ? cellR[x][z - 1] : 0); if (other == R_OUT && cellR[x][cz] != R_BATH && rnd(100) < 40) fZ[x][z][s].window = 1; }
   stainsInit = 0; for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (cells[x][z].stain) stainsInit++;
   // мусор
-  int nt = 0; for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (inRoom(x, z) && !(x == entX && z == entZ) && rnd(100) < 30) { Trash t = {x + 0.25f + rnd(50) / 100.0f, z + 0.25f + rnd(50) / 100.0f, rnd(4), true}; trash.push_back(t); nt++; }
+  int tp = flatCond == CO_FIRE ? 38 : flatCond == CO_BARE ? 34 : flatCond == CO_GRANNY ? 22 : 30;
+  int nt = 0; for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (inRoom(x, z) && !(x == entX && z == entZ) && rnd(100) < tp) {
+    int k = rnd(4); if (flatCond == CO_FIRE && rnd(100) < 55) k = 5; else if (flatCond == CO_BARE) k = rnd(100) < 60 ? 4 : 1; else if (flatCond == CO_FLOOD && rnd(100) < 40) k = 6;
+    Trash t = {x + 0.25f + rnd(50) / 100.0f, z + 0.25f + rnd(50) / 100.0f, k, true}; trash.push_back(t); nt++; }
+  // «бабушкина» квартира: старая мебель у стен, её надо вынести
+  oldInit = 0;
+  if (flatCond == CO_GRANNY) for (int z = 0; z < MH && oldInit < 6; z++) for (int x = 0; x < MW && oldInit < 6; x++) {
+    if (!inRoom(x, z) || cellR[x][z] != R_LIV || trashOn(x, z) || doorX[x][z] || doorX[x + 1][z] || doorZ[x][z] || doorZ[x][z + 1]) continue;
+    int rot = -1; if (wallZ[x][z]) rot = 0; else if (wallZ[x][z + 1]) rot = 2; else if (wallX[x][z]) rot = 1; else if (wallX[x + 1][z]) rot = 3;
+    if (rot < 0 || rnd(100) >= 30) continue;
+    static const int OLDF[4] = {37, 38, 39, 40}; cells[x][z].furn = (unsigned char)OLDF[rnd(4)]; cells[x][z].frot = (unsigned char)rot; oldInit++;
+  }
 }
 // ---- прогресс ремонта ----
-struct Prog { int trashLeft, trashAll, stains, stainsAll, paper, paperAll, unputty, unpainted, wallsAll, floorsOld, floorsAll, furnOk, furnNeed, furnValue; float k; };
+struct Prog { int oldLeft, oldAll, trashLeft, trashAll, stains, stainsAll, paper, paperAll, unputty, unpainted, wallsAll, floorsOld, floorsAll, furnOk, furnNeed, furnValue; float k; };
 static Prog progress() {
   Prog p; memset(&p, 0, sizeof p); int fcnt[NFURN]; memset(fcnt, 0, sizeof fcnt);
   for (size_t i = 0; i < trash.size(); i++) { p.trashAll++; if (trash[i].alive) p.trashLeft++; }
   p.trashLeft += carried;
-  for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (inRoom(x, z)) { p.floorsAll++; if (!cells[x][z].floor) p.floorsOld++; if (cells[x][z].stain) p.stains++; p.stainsAll++; if (cells[x][z].furn) { int it = cells[x][z].furn; if (fcnt[it]++ < 4) p.furnValue += FURN[it].value; } }
+  for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (inRoom(x, z)) { p.floorsAll++; if (!cells[x][z].floor) p.floorsOld++; if (cells[x][z].stain) p.stains++; p.stainsAll++; if (cells[x][z].furn) { int it = cells[x][z].furn; if (FURN[it].old) p.oldLeft++; else if (fcnt[it]++ < 4) p.furnValue += FURN[it].value; } }
   for (int z = 0; z < MH; z++) for (int x = 0; x <= MW; x++) for (int s = 0; s < 2; s++) { int cx = s == 0 ? x - 1 : x; if (!wallX[x][z] || doorX[x][z] || !inRoom(cx, z)) continue; p.wallsAll++; const Face &f = fX[x][z][s]; if (f.wallpaper) p.paper++; if (!f.putty) p.unputty++; if (!f.paint && !f.paper) p.unpainted++; }
   for (int x = 0; x < MW; x++) for (int z = 0; z <= MH; z++) for (int s = 0; s < 2; s++) { int cz = s == 0 ? z - 1 : z; if (!wallZ[x][z] || doorZ[x][z] || !inRoom(x, cz)) continue; p.wallsAll++; const Face &f = fZ[x][z][s]; if (f.wallpaper) p.paper++; if (!f.putty) p.unputty++; if (!f.paint && !f.paper) p.unpainted++; }
   // нужная мебель: в комнате диван или кровать, на кухне холодильник и плита, в ванной ванна, раковина, унитаз
-  bool has[NFURN] = {false}; for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (cells[x][z].furn && (FURN[cells[x][z].furn].room == 0 || FURN[cells[x][z].furn].room == cellR[x][z])) has[cells[x][z].furn] = true;
-  p.furnNeed = 6; p.furnOk = (has[1] || has[2]) + has[5] + has[6] + has[8] + has[9] + has[10];
-  p.paperAll = p.wallsAll; p.k = 0.15f * (p.trashAll ? 1.0f - (float)p.trashLeft / p.trashAll : 1) + 0.10f * clampf(1.0f - (float)p.stains / imax(1, stainsInit), 0.0f, 1.0f)
+  bool has[NFURN] = {false}; for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) { int it = cells[x][z].furn; if (it && !FURN[it].old && (FURN[it].room == 0 || FURN[it].room == cellR[x][z])) { has[furnShape(it)] = true; has[furnAlias(furnShape(it))] = true; } }
+  p.furnNeed = 6; p.furnOk = (has[FU_SOFA] || has[FU_BED]) + has[FU_FRIDGE] + has[FU_STOVE] + has[FU_BATH] + has[FU_SINK] + has[FU_WC];
+  p.oldAll = imax(oldInit, p.oldLeft);
+  int tl = p.trashLeft + p.oldLeft, ta = p.trashAll + p.oldAll;   // старая мебель считается как мусор
+  p.paperAll = p.wallsAll; p.k = 0.15f * (ta ? 1.0f - (float)tl / ta : 1) + 0.10f * clampf(1.0f - (float)p.stains / imax(1, stainsInit), 0.0f, 1.0f)
     + 0.10f * (1.0f - (float)p.paper / imax(1, p.wallsAll)) + 0.08f * (1.0f - (float)p.unputty / imax(1, p.wallsAll)) + 0.22f * (1.0f - (float)p.unpainted / imax(1, p.wallsAll)) + 0.20f * (1.0f - (float)p.floorsOld / imax(1, p.floorsAll)) + 0.15f * p.furnOk / p.furnNeed;
   return p;
 }
-static int salePrice() { Prog p = progress(); return (int)(flatBuy * (0.88f + 0.35f * p.k * p.k + 0.07f * p.k)) + p.furnValue * 8 / 10; }
+// ---- стиль: сколько отделки и мебели в одном стиле ----
+struct StyleInfo { int best; float unity; int cnt[NSTYLE]; int total; };
+static StyleInfo styleInfo() {
+  StyleInfo si; memset(&si, 0, sizeof si);
+  int pot = 0;                                   // сколько всего можно отделать: пока сделано мало, стиль не засчитывается
+  #define FACE_ST(f) { const Face &ff = (f); pot++; if (ff.paint || ff.paper) { si.total++; si.cnt[ff.paper ? PAPERS[imin(ff.paper, NPAPER - 1)].style : PAINTS[imin(ff.paint, NPAINT - 1)]]++; } }
+  for (int z = 0; z < MH; z++) for (int x = 0; x <= MW; x++) for (int q = 0; q < 2; q++) { int cx = q == 0 ? x - 1 : x; if (wallX[x][z] && !doorX[x][z] && inRoom(cx, z)) FACE_ST(fX[x][z][q]); }
+  for (int x = 0; x < MW; x++) for (int z = 0; z <= MH; z++) for (int q = 0; q < 2; q++) { int cz = q == 0 ? z - 1 : z; if (wallZ[x][z] && !doorZ[x][z] && inRoom(x, cz)) FACE_ST(fZ[x][z][q]); }
+  #undef FACE_ST
+  for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (inRoom(x, z)) {
+    const Cell &c = cells[x][z];
+    if (!tiledRoom(cellR[x][z])) pot++;
+    if (c.floor && !tiledRoom(cellR[x][z])) { si.total++; si.cnt[FLOORS[imin(c.floor, NFLOOR - 1)].style]++; }   // плитка в ванной и на кухне в стиль не считается
+    if (c.furn && !FURN[c.furn].old) { si.total += 3; si.cnt[FURN[c.furn].style] += 3; }
+  }
+  si.best = 0; for (int i = 1; i < NSTYLE; i++) if (si.cnt[i] > (si.best ? si.cnt[si.best] : 0)) si.best = i;
+  si.unity = si.best && si.total ? (float)si.cnt[si.best] / imax(si.total, pot * 6 / 10) : 0;
+  return si;
+}
+static float styleBonus(const StyleInfo &si) { return si.unity > 0.45f ? fminv(0.1f, (si.unity - 0.45f) * 0.25f) : 0; }   // до +10% за единый стиль
+static int salePrice() {
+  Prog p = progress(); float m = CONDK[flatCond], base = flatBuy / m, lo = 0.88f * m, g = (0.35f * p.k * p.k + 0.07f * p.k) / 0.42f;   // после пожара дёшево купил - но и дёшево продашь, пока не отремонтируешь
+  StyleInfo si = styleInfo();
+  return (int)(base * (lo + (1.30f - lo) * g) * (1.0f + styleBonus(si) * p.k)) + p.furnValue * 8 / 10;
+}
+// ---- покупатели с пожеланиями ----
+enum { BU_FAMILY, BU_STUDENT, BU_BOSS, BU_GRANNY, BU_IT, BU_COUPLE, NBUYER };
+static const char *BUYERN[NBUYER] = {"СЕМЬЯ С ДЕТЬМИ", "СТУДЕНТ", "БИЗНЕСМЕН", "ПЕНСИОНЕРКА", "АЙТИШНИК", "МОЛОДАЯ ПАРА"};
+static const float BUYERK[NBUYER] = {1.0f, 0.93f, 1.03f, 0.98f, 1.0f, 1.0f};
+enum { W_SHAPE, W_STYLE, W_STYLE2, W_ANYSTYLE, W_PREMFLOOR, W_DONE, W_NODARK };
+struct Wish { int kind, a, b; float bonus; const char *text; };
+static const Wish WISHES[NBUYER][3] = {
+  {{W_SHAPE, FU_CRIB, 0, 0.06f, "ДЕТСКАЯ КРОВАТКА"}, {W_SHAPE, FU_WASH, 0, 0.03f, "СТИРАЛЬНАЯ МАШИНА"}, {W_DONE, 90, 0, 0.04f, "РЕМОНТ 90% И ВЫШЕ"}},
+  {{W_SHAPE, FU_DESK, 0, 0.04f, "РАБОЧИЙ СТОЛ"}, {W_SHAPE, FU_BED, 0, 0.03f, "КРОВАТЬ"}, {W_DONE, 60, 0, 0.02f, "РЕМОНТ 60% И ВЫШЕ"}},
+  {{W_ANYSTYLE, 70, 0, 0.08f, "ЕДИНЫЙ СТИЛЬ 70%"}, {W_PREMFLOOR, 50, 0, 0.05f, "ДОРОГОЙ ПОЛ"}, {W_SHAPE, FU_TV, 0, 0.02f, "ТЕЛЕВИЗОР"}},
+  {{W_STYLE, ST_CLASSIC, 0, 0.07f, "СТИЛЬ КЛАССИКА"}, {W_SHAPE, FU_FLOWER, 0, 0.02f, "ЦВЕТОК"}, {W_SHAPE, FU_RUG, 0, 0.03f, "КОВЁР"}},
+  {{W_STYLE2, ST_LOFT, ST_MODERN, 0.06f, "ЛОФТ ИЛИ МОДЕРН"}, {W_SHAPE, FU_DESK, 0, 0.05f, "РАБОЧИЙ СТОЛ С ПК"}, {W_SHAPE, FU_TV, 0, 0.02f, "ТЕЛЕВИЗОР"}},
+  {{W_STYLE, ST_SCANDI, 0, 0.06f, "СТИЛЬ СКАНДИ"}, {W_SHAPE, FU_FLOWER, 0, 0.02f, "ЦВЕТОК"}, {W_SHAPE, FU_BED, 0, 0.03f, "КРОВАТЬ"}} };
+static int buyers[3];
+static void genBuyers() {                     // три разных покупателя; в центре чаще богатые, на окраине - студенты и семьи
+  unsigned r = flatSeed * 2246822519u + 777u; int w[NBUYER] = {3, 3, 2, 2, 2, 2};
+  if (flatDist == DI_CENTER) { w[BU_BOSS] = 5; w[BU_IT] = 3; w[BU_STUDENT] = 1; }
+  if (flatDist == DI_EDGE) { w[BU_STUDENT] = 5; w[BU_FAMILY] = 4; w[BU_BOSS] = 1; }
+  for (int i = 0; i < 3; i++) for (;;) { r = r * 1103515245u + 12345u; int sum = 0; for (int k = 0; k < NBUYER; k++) sum += w[k]; int v = (int)((r >> 16) % (unsigned)sum), t = 0;
+    while (v >= w[t]) { v -= w[t]; t++; } bool dup = false; for (int k = 0; k < i; k++) if (buyers[k] == t) dup = true; if (!dup) { buyers[i] = t; break; } }
+}
+static bool hasShape(int sh) { for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) { int it = cells[x][z].furn; if (it && !FURN[it].old && furnShape(it) == sh) return true; } return false; }
+static bool wishOk(const Wish &w, const Prog &p, const StyleInfo &si) {
+  switch (w.kind) {
+    case W_SHAPE: return hasShape(w.a);
+    case W_STYLE: return si.best == w.a && si.unity * 100 >= 50;
+    case W_STYLE2: return (si.best == w.a || si.best == w.b) && si.unity * 100 >= 50;
+    case W_ANYSTYLE: return si.unity * 100 >= w.a;
+    case W_PREMFLOOR: { int n = 0, all = 0; for (int x = 0; x < MW; x++) for (int z = 0; z < MH; z++) if (inRoom(x, z) && !tiledRoom(cellR[x][z])) { all++; if (cells[x][z].floor && FLOORS[imin(cells[x][z].floor, NFLOOR - 1)].prem) n++; } return all && n * 100 >= all * w.a; }
+    case W_DONE: return p.k * 100 >= w.a;
+  }
+  return true;
+}
+static int buyerPrice(int b) {
+  Prog p = progress(); StyleInfo si = styleInfo(); float k = BUYERK[b];
+  for (int i = 0; i < 3; i++) { const Wish &w = WISHES[b][i]; if (!w.text[0]) continue; if (wishOk(w, p, si)) k += w.bonus; else if (b != BU_STUDENT) k -= 0.02f; }
+  return (int)((long long)salePrice() * (int)(k * 1000) / 1000 / 1000 * 1000);
+}
 
 // ---------- игрок, инструменты, прицел ----------
 enum { T_HAND, T_MOP, T_SCRAPER, T_PUTTY, T_ROLLER, T_PAPER, T_FLOOR, T_FURN, NTOOL };
 static const char *TOOLN[NTOOL] = {"РУКИ", "ШВАБРА", "ШПАТЕЛЬ", "ШПАКЛЁВКА", "ВАЛИК", "ОБОИ", "ПОЛ", "МЕБЕЛЬ"};
 static float px = 2.5f, pz = 4.5f, yaw = 0, pitch = -0.2f;
-static int tool = T_HAND, paintSel = 1, furnSel = 1, paperSel = 1;
+static int tool = T_HAND, paintSel = 1, furnSel = 1, paperSel = 1, floorSel = 1;
 static float workT = 0, workBob = 0; static bool working = false;
 enum { H_NONE, H_TRASH, H_FLOOR, H_WALLX, H_WALLZ };
 struct Hit { int type, x, z, s, idx; float hx, hz; };
@@ -1224,13 +1400,13 @@ static const char *actionInfo(float &need, bool &ok, char *why) {
   switch (tool) {
     case T_HAND:
       if (aim.type == H_TRASH) { if (carried >= 4) { strcpy(why, "РУКИ ЗАНЯТЫ: ОТНЕСИ МУСОР К ВХОДНОЙ ДВЕРИ"); return "ВЗЯТЬ"; } ok = true; need = 0.35f; return "ВЗЯТЬ МУСОР"; }
-      if (aim.type == H_FLOOR && cells[aim.x][aim.z].furn) { ok = true; need = 0.5f; return "УБРАТЬ МЕБЕЛЬ"; }
+      if (aim.type == H_FLOOR && cells[aim.x][aim.z].furn) { ok = true; need = FURN[cells[aim.x][aim.z].furn].old ? 1.2f : 0.5f; return FURN[cells[aim.x][aim.z].furn].old ? "ВЫНЕСТИ СТАРЬЁ" : "УБРАТЬ МЕБЕЛЬ"; }
       strcpy(why, "НАВЕДИ НА МУСОР"); return "ВЗЯТЬ";
     case T_MOP:
-      if (aim.type == H_FLOOR && cells[aim.x][aim.z].stain) { ok = true; need = 0.9f; return "ОТМЫТЬ"; }
+      if (aim.type == H_FLOOR && cells[aim.x][aim.z].stain) { int st = cells[aim.x][aim.z].stain; ok = true; need = st == 2 ? 1.4f : st == 3 ? 0.7f : 0.9f; return st == 2 ? "ОТМЫТЬ ГАРЬ" : st == 3 ? "СОБРАТЬ ВОДУ" : "ОТМЫТЬ"; }
       strcpy(why, "НАВЕДИ НА ГРЯЗНОЕ ПЯТНО НА ПОЛУ"); return "МЫТЬ";
     case T_SCRAPER:
-      if (f && f->wallpaper) { ok = true; need = 1.1f; return "СОДРАТЬ ОБОИ"; }
+      if (f && f->wallpaper) { ok = true; need = f->wallpaper >= 2 ? 1.5f : 1.1f; return f->wallpaper == 2 ? "СОДРАТЬ ГАРЬ" : f->wallpaper == 3 ? "СОДРАТЬ ПЛЕСЕНЬ" : "СОДРАТЬ ОБОИ"; }
       strcpy(why, f ? "ЗДЕСЬ ОБОЕВ УЖЕ НЕТ" : "НАВЕДИ НА СТЕНУ СО СТАРЫМИ ОБОЯМИ"); return "СОДРАТЬ";
     case T_PUTTY:
       if (f && f->wallpaper) { strcpy(why, "СНАЧАЛА СОДРИ СТАРЫЕ ОБОИ ШПАТЕЛЕМ"); return "ШПАКЛЕВАТЬ"; }
@@ -1248,11 +1424,12 @@ static const char *actionInfo(float &need, bool &ok, char *why) {
       strcpy(why, f ? "УЖЕ ЭТОГО ЦВЕТА" : "НАВЕДИ НА СТЕНУ"); return "КРАСИТЬ";
     case T_FLOOR:
       if (aim.type == H_FLOOR) { Cell &c = cells[aim.x][aim.z];
-        if (c.floor) { strcpy(why, "ПОЛ УЖЕ НОВЫЙ"); return "ПОЛ"; }
+        if (c.floor == floorSel) { strcpy(why, "ТАКОЙ ПОЛ УЖЕ ЕСТЬ"); return "ПОЛ"; }
         if (c.stain || trashOn(aim.x, aim.z)) { strcpy(why, "СНАЧАЛА УБЕРИ МУСОР И ОТМОЙ ПЯТНО"); return "ПОЛ"; }
         if (c.furn) { strcpy(why, "МЕШАЕТ МЕБЕЛЬ"); return "ПОЛ"; }
-        int cost = tiledRoom(cellR[aim.x][aim.z]) ? COST_FLOOR_TILE : COST_FLOOR_LAM; if (money < cost) { strcpy(why, "НЕ ХВАТАЕТ ДЕНЕГ"); return "ПОЛ"; }
-        ok = true; need = 1.0f; return tiledRoom(cellR[aim.x][aim.z]) ? "ПОЛОЖИТЬ ПЛИТКУ" : "ПОЛОЖИТЬ ЛАМИНАТ"; }
+        if (money < FLOORS[floorSel].cost) { strcpy(why, "НЕ ХВАТАЕТ ДЕНЕГ"); return "ПОЛ"; }
+        static char fb[64]; snprintf(fb, sizeof fb, "%s: %s", c.floor ? "ПЕРЕСТЕЛИТЬ" : "ПОЛОЖИТЬ", FLOORS[floorSel].name);
+        ok = true; need = 1.0f; return fb; }
       strcpy(why, "НАВЕДИ НА ПОЛ"); return "ПОЛ";
     case T_FURN:
       if (aim.type == H_FLOOR) { Cell &c = cells[aim.x][aim.z];
@@ -1269,6 +1446,8 @@ static void doAction() {
   switch (tool) {
     case T_HAND:
       if (aim.type == H_TRASH) { trash[aim.idx].alive = false; carried++; snprintf(b, sizeof b, "В РУКАХ МУСОРА: %d/4 - НЕСИ К ВХОДНОЙ ДВЕРИ", carried); say(b); }
+      else if (aim.type == H_FLOOR && cells[aim.x][aim.z].furn && FURN[cells[aim.x][aim.z].furn].old) { int it = cells[aim.x][aim.z].furn; money += FURN[it].price; spent -= FURN[it].price; cells[aim.x][aim.z].furn = 0;
+        snprintf(b, sizeof b, "%s ВЫНЕСЕН: БАРАХОЛКА +%d Р", FURN[it].name, FURN[it].price); say(b); }
       else if (aim.type == H_FLOOR && cells[aim.x][aim.z].furn) { int it = cells[aim.x][aim.z].furn; money += FURN[it].price / 2; spent -= FURN[it].price / 2; cells[aim.x][aim.z].furn = 0; say("МЕБЕЛЬ УБРАНА (ВЕРНУЛИ ПОЛОВИНУ ЦЕНЫ)"); }
       break;
     case T_MOP: cells[aim.x][aim.z].stain = 0; break;
@@ -1276,7 +1455,7 @@ static void doAction() {
     case T_PUTTY: f->putty = 1; money -= COST_PUTTY; spent += COST_PUTTY; break;
     case T_PAPER: f->paper = (unsigned char)paperSel; f->paint = 0; money -= COST_PAPER; spent += COST_PAPER; break;
     case T_ROLLER: f->paint = (unsigned char)paintSel; f->paper = 0; money -= COST_PAINT; spent += COST_PAINT; break;
-    case T_FLOOR: { int cost = tiledRoom(cellR[aim.x][aim.z]) ? COST_FLOOR_TILE : COST_FLOOR_LAM; cells[aim.x][aim.z].floor = 1; money -= cost; spent += cost; } break;
+    case T_FLOOR: { int cost = FLOORS[floorSel].cost; cells[aim.x][aim.z].floor = (unsigned char)floorSel; money -= cost; spent += cost; } break;
     case T_FURN: { Cell &c = cells[aim.x][aim.z]; c.furn = (unsigned char)furnSel; c.frot = (unsigned char)(((int)roundf(yaw / 1.5708f) % 4 + 6) % 4); money -= FURN[furnSel].price; spent += FURN[furnSel].price;
       if (FURN[furnSel].room && FURN[furnSel].room != cellR[aim.x][aim.z]) { snprintf(b, sizeof b, "%s ЛУЧШЕ СМОТРИТСЯ: %s", FURN[furnSel].name, ROOMN[FURN[furnSel].room]); say(b); } } break;
   }
@@ -1316,8 +1495,15 @@ static void doorLeaf(V3 hinge, float baseYaw, float k, bool ent) {   // поло
   for (int s2 = -1; s2 <= 1; s2 += 2) drawBox(hinge + dir * 0.78f + side * (0.035f * s2) + v3(0, 1.0f, 0), v3(0.01f, 0.012f, 0.04f), a, RGB(200, 180, 90), true);   // ручки
   drawBox(hinge + dir * 0.44f + v3(0, 1.45f, 0) + side * 0.021f, v3(0.002f, 0.3f, 0.3f), a, mixc(lf, RGB(0, 0, 0), 0.12f), false);   // филёнка
 }
-static u32 oldFloorCol(int r) { return r == R_BATH ? RGB(120, 120, 105) : r == R_KIT ? RGB(140, 120, 90) : RGB(120, 95, 70); }
-static u32 newFloorCol(int r, int x, int z) { return tiledRoom(r) ? ((x + z) & 1 ? RGB(225, 228, 232) : RGB(205, 210, 216)) : ((x * 3 + z) % 2 ? RGB(190, 145, 95) : RGB(176, 132, 86)); }
+static u32 oldFloorCol(int r) {
+  if (flatCond == CO_BARE) return RGB(150, 150, 147);                                // бетонная стяжка
+  u32 c = r == R_BATH ? RGB(120, 120, 105) : r == R_KIT ? RGB(140, 120, 90) : flatHouse == HO_STALIN ? RGB(128, 90, 56) : RGB(120, 95, 70);
+  if (flatCond == CO_FIRE) c = mixc(c, RGB(30, 26, 22), 0.55f);
+  if (flatCond == CO_FLOOD) c = mixc(c, RGB(150, 138, 115), 0.3f);
+  return c;
+}
+static u32 outerWallCol() { return flatHouse == HO_KHRU ? RGB(178, 112, 88) : flatHouse == HO_PANEL ? RGB(175, 172, 165) : flatHouse == HO_STALIN ? RGB(222, 198, 145) : RGB(200, 205, 212); }
+static u32 newFloorCol(int type, int x, int z) { const FloorT &f = FLOORS[imax(1, imin(NFLOOR - 1, type))]; return f.tile ? ((x + z) & 1 ? f.a : f.b) : ((x * 3 + z) % 2 ? f.a : f.b); }
 static void motif(V3 c, V3 n, bool alongZ, float o, float y, float k, float hw, float hh, u32 col) {
   float l = fmaxv(o - hw, -0.5f), r = fminv(o + hw, 0.5f); if (r <= l + 0.001f) return;   // ничего не вылезает за край полосы
   float mo = (l + r) * 0.5f, mw = (r - l) * 0.5f;
@@ -1333,10 +1519,20 @@ static void wallSide(V3 c, bool alongZ, const Face &f, float sgn, int room, int 
   // где на стене окно: там узор не рисуем
   #define FREE(o, y) (!f.window || fabsf(o) > 0.4f || (y) < -0.42f || (y) > 0.86f)
   const Paper &pp = PAPERS[f.paper < NPAPER ? f.paper : 0];
-  u32 base = f.paint ? PAINT[f.paint] : f.paper ? pp.a : f.wallpaper ? RGB(206, 190, 142) : f.putty ? RGB(234, 232, 226) : RGB(158, 156, 150);
+  u32 base = f.paint ? PAINT[f.paint] : f.paper ? pp.a : f.wallpaper == 2 ? RGB(92, 80, 68) : f.wallpaper == 3 ? RGB(192, 182, 140) : f.wallpaper ? RGB(206, 190, 142)
+           : f.putty ? RGB(234, 232, 226) : flatCond == CO_BARE ? RGB(170, 168, 162) : RGB(158, 156, 150);
   drawBox(c, hs, 0, base, true);
   unsigned h = (unsigned)seed * 2654435761u;
-  if (near_ && f.wallpaper) {                                     // старые обои: дамаск, швы рулонов, пожелтение, подтёки, оторванные куски
+  if (near_ && f.wallpaper == 2) {                                // обгоревшие обои: копоть снизу вверх, прогары до бетона
+    for (int i = 0; i < 6; i++) { float o = -0.42f + i * 0.17f + ((h >> (i * 3)) % 5) * 0.012f, hh = 0.35f + ((h >> (i * 2 + 1)) % 6) * 0.13f;
+      drawBox(AT(o, -1.28f + hh, 1.03f), HS(0.05f + (i % 2) * 0.03f, hh, 0.001f), 0, RGB(34, 30, 27), false);
+      motif(c, n, alongZ, o, -1.28f + hh * 2, 1.04f, 0.09f, 0.07f, RGB(40, 36, 32)); }
+    drawBox(AT(0, 1.15f, 1.04f), HS(0.5f, 0.15f, 0.001f), 0, RGB(30, 27, 25), false);                 // чёрный верх под потолком
+    for (int i = 0; i < 2; i++) { float o = ((h >> (5 + i * 4)) % 7) * 0.12f - 0.36f, y = -0.6f + i * 0.9f;
+      if (FREE(o, y) && (h >> (9 + i)) % 3) { motif(c, n, alongZ, o, y, 1.05f, 0.08f, 0.06f, RGB(110, 72, 40)); motif(c, n, alongZ, o + 0.03f, y + 0.04f, 1.05f, 0.05f, 0.05f, RGB(110, 72, 40));
+        motif(c, n, alongZ, o, y, 1.06f, 0.06f, 0.04f, RGB(140, 138, 132)); motif(c, n, alongZ, o + 0.03f, y + 0.04f, 1.06f, 0.03f, 0.035f, RGB(140, 138, 132)); } }   // прогар: бетон с рыжей каймой
+  }
+  else if (near_ && f.wallpaper) {                                // старые обои: дамаск, швы рулонов, пожелтение, подтёки, оторванные куски
     u32 m1 = RGB(178, 160, 112), m2 = RGB(222, 208, 165);
     for (int r = 0; r < 7; r++) for (int q = 0; q < 4; q++) {
       float o = (r % 2) ? -0.5f + q * 0.333f : -0.333f + q * 0.333f, y = -1.05f + r * 0.36f; if (!(r % 2) && q == 3) continue; if (!FREE(o, y)) continue;
@@ -1352,6 +1548,23 @@ static void wallSide(V3 c, bool alongZ, const Face &f, float sgn, int room, int 
       if (FREE(o, y)) { motif(c, n, alongZ, o, y, 1.09f, 0.11f, 0.13f, RGB(150, 148, 142)); motif(c, n, alongZ, o + 0.09f, y + 0.1f, 1.1f, 0.04f, 0.06f, RGB(150, 148, 142));
         motif(c, n, alongZ, o - 0.1f, y - 0.11f, 1.11f, 0.03f, 0.05f, RGB(225, 212, 170)); }   // загнутый край
     }
+    if (f.wallpaper == 3) {                                         // после потопа: разводы и чёрно-зелёная плесень снизу и под потолком
+      drawBox(AT(0, -0.95f, 1.12f), HS(0.5f, 0.33f, 0.001f), 0, RGB(165, 150, 110), false);
+      drawBox(AT(0, -0.62f, 1.125f), HS(0.5f, 0.012f, 0.001f), 0, RGB(130, 112, 80), false);   // граница воды
+      for (int i = 0; i < 7; i++) { float o = ((h >> (i * 3)) % 9) * 0.11f - 0.44f, y = i < 4 ? -1.15f + ((h >> (i + 7)) % 4) * 0.12f : 1.1f - ((h >> (i + 3)) % 3) * 0.1f;
+        motif(c, n, alongZ, o, y, 1.13f, 0.07f + (i % 3) * 0.02f, 0.06f, RGB(58, 74, 50)); motif(c, n, alongZ, o + 0.03f, y + 0.02f, 1.14f, 0.035f, 0.03f, RGB(32, 40, 30)); }
+    }
+    if (flatCond == CO_GRANNY && f.wallpaper == 1 && !f.window && room == R_LIV && seed % 9 == 4) {   // ковёр на стене
+      drawBox(AT(0, 0.15f, 1.15f), HS(0.4f, 0.55f, 0.003f), 0, RGB(130, 30, 38), false);
+      drawBox(AT(0, 0.15f, 1.18f), HS(0.33f, 0.47f, 0.002f), 0, RGB(175, 60, 50), false);
+      drawBox(AT(0, 0.15f, 1.21f), HS(0.17f, 0.25f, 0.002f), 0, RGB(40, 50, 100), false);
+      drawBox(AT(0, 0.15f, 1.24f), HS(0.08f, 0.12f, 0.002f), 0, RGB(225, 190, 110), false);
+      for (int i = 0; i < 4; i++) drawBox(AT((i % 2 ? 1 : -1) * 0.24f, 0.15f + (i / 2 ? 1 : -1) * 0.36f, 1.22f), HS(0.05f, 0.06f, 0.002f), 0, RGB(225, 190, 110), false);
+    }
+  }
+  else if (near_ && flatCond == CO_BARE && !f.putty && !f.paint && !f.paper) {   // монолит: швы опалубки и отверстия от стяжек
+    for (int i = 0; i < 3; i++) drawBox(AT(0, -0.8f + i * 0.8f, 1.03f), HS(0.5f, 0.005f, 0.001f), 0, RGB(140, 138, 132), false);
+    for (int i = 0; i < 6; i++) drawBox(AT(-0.3f + (i % 3) * 0.3f, -0.4f + (i / 3) * 0.8f, 1.04f), HS(0.015f, 0.015f, 0.001f), 0, RGB(110, 108, 104), false);
   }
   else if (near_ && !f.putty && !f.paint && !f.paper) {          // голая стена: трещины, выбоины, остатки клея
     float o = ((h >> 3) % 7) * 0.12f - 0.36f, y = 0.9f;
@@ -1405,9 +1618,25 @@ static void wallSide(V3 c, bool alongZ, const Face &f, float sgn, int room, int 
   if (f.window) {                                                   // окно: рама, вид на улицу, подоконник, батарея, шторы
     drawBox(AT(0, 0.25f, 1.12f), HS(0.36f, 0.55f, 0.003f), 0, fresh ? RGB(250, 250, 250) : RGB(200, 190, 165), true);
     drawBox(AT(0, 0.45f, 1.3f), HS(0.31f, 0.3f, 0.002f), 0, RGB(150, 195, 240), false);                              // небо
+    if (flatHouse == HO_KHRU) {                                     // двор: кирпичная пятиэтажка и деревья
+      drawBox(AT(0, 0.0f, 1.32f), HS(0.31f, 0.22f, 0.002f), 0, RGB(185, 120, 95), false);
+      if (near_) for (int i = 0; i < 12; i++) drawBox(AT(-0.24f + (i % 4) * 0.16f, -0.12f + (i / 4) * 0.11f, 1.4f), HS(0.03f, 0.03f, 0.001f), 0, i % 3 ? RGB(80, 95, 115) : RGB(250, 225, 150), false);
+      drawBox(AT(-0.2f, -0.1f, 1.45f), HS(0.1f, 0.13f, 0.002f), 0, RGB(70, 130, 60), false); drawBox(AT(0.2f, -0.14f, 1.46f), HS(0.08f, 0.1f, 0.002f), 0, RGB(58, 115, 52), false);
+    } else if (flatHouse == HO_STALIN) {                            // старая улица: жёлтый дом с колоннами, липы
+      drawBox(AT(0, 0.1f, 1.32f), HS(0.31f, 0.3f, 0.002f), 0, RGB(222, 198, 145), false);
+      drawBox(AT(0, 0.38f, 1.38f), HS(0.31f, 0.025f, 0.001f), 0, RGB(240, 228, 200), false);
+      if (near_) for (int i = 0; i < 4; i++) { drawBox(AT(-0.22f + i * 0.147f, 0.08f, 1.4f), HS(0.015f, 0.26f, 0.001f), 0, RGB(242, 232, 210), false);
+        drawBox(AT(-0.15f + i * 0.147f, 0.12f, 1.4f), HS(0.03f, 0.08f, 0.001f), 0, i == 1 ? RGB(250, 225, 150) : RGB(90, 100, 120), false); }
+      drawBox(AT(-0.05f, -0.14f, 1.45f), HS(0.26f, 0.1f, 0.002f), 0, RGB(80, 140, 65), false);
+    } else if (flatHouse == HO_NEW) {                               // новый квартал: стеклянные башни и кран
+      drawBox(AT(-0.15f, 0.2f, 1.32f), HS(0.08f, 0.48f, 0.002f), 0, RGB(120, 155, 190), false);
+      drawBox(AT(0.1f, 0.1f, 1.32f), HS(0.1f, 0.38f, 0.002f), 0, RGB(170, 180, 198), false);
+      if (near_) for (int i = 0; i < 8; i++) drawBox(AT(-0.15f, -0.2f + i * 0.11f, 1.4f), HS(0.08f, 0.004f, 0.001f), 0, RGB(200, 220, 240), false);
+      drawBox(AT(0.27f, 0.36f, 1.4f), HS(0.007f, 0.36f, 0.001f), 0, RGB(235, 190, 40), false); drawBox(AT(0.18f, 0.7f, 1.4f), HS(0.12f, 0.007f, 0.001f), 0, RGB(235, 190, 40), false);
+    } else {                                                        // панельки
     drawBox(AT(-0.12f, 0.02f, 1.32f), HS(0.12f, 0.24f, 0.002f), 0, RGB(150, 140, 135), false);                      // соседний дом
     drawBox(AT(0.16f, 0.08f, 1.32f), HS(0.14f, 0.3f, 0.002f), 0, RGB(185, 175, 160), false);
-    if (near_) for (int i = 0; i < 6; i++) drawBox(AT(-0.18f + (i % 3) * 0.06f + (i > 2 ? 0.3f : 0), -0.05f + (i / 3) * 0.12f + (i > 2 ? 0.05f : 0), 1.35f), HS(0.012f, 0.02f, 0.001f), 0, RGB(250, 230, 150), false);   // окна напротив
+    if (near_) for (int i = 0; i < 6; i++) drawBox(AT(-0.18f + (i % 3) * 0.06f + (i > 2 ? 0.3f : 0), -0.05f + (i / 3) * 0.12f + (i > 2 ? 0.05f : 0), 1.35f), HS(0.012f, 0.02f, 0.001f), 0, RGB(250, 230, 150), false); }   // окна напротив
     drawBox(AT(0, 0.25f, 1.5f), HS(0.012f, 0.5f, 0.002f), 0, fresh ? RGB(250, 250, 250) : RGB(200, 190, 165), false);   // перекладины рамы
     drawBox(AT(0, 0.25f, 1.5f), HS(0.31f, 0.012f, 0.002f), 0, fresh ? RGB(250, 250, 250) : RGB(200, 190, 165), false);
     drawBox(AT(0, -0.32f, 1.5f), HS(0.42f, 0.02f, 0.07f), 0, fresh ? RGB(248, 248, 248) : RGB(215, 205, 180), true);   // подоконник
@@ -1424,15 +1653,16 @@ static void wallSide(V3 c, bool alongZ, const Face &f, float sgn, int room, int 
   #undef HS
 }
 static void drawFurn(int it, float cx, float cz, int rot) {
+  int sh = furnShape(it); u32 cA = it > 0 && it < NFURN ? FURN[it].a : 0, cB = it > 0 && it < NFURN ? FURN[it].b : 0;   // свои цвета у стильной мебели
   float yawF = rot * 1.5708f, cs = cosf(yawF), sn = sinf(yawF);
   V3 c = v3(cx, 0, cz), ax = v3(cs, 0, -sn), az = v3(sn, 0, cs);
   #define L(x, y, z) (c + ax * (x) + v3(0, (y), 0) + az * (z))
   #define B(x, y, z, hx, hy, hz, col) drawBox(L(x, y, z), v3(hx, hy, hz), yawF, col, true)
   #define F(x, y, z, hx, hy, hz, col) drawBox(L(x, y, z), v3(hx, hy, hz), yawF, col, false)
   u32 wood = RGB(150, 105, 70), woodD = RGB(105, 72, 48), white = RGB(242, 242, 245), metal = RGB(185, 188, 195);
-  switch (it) {
+  switch (sh) {
     case 1: {   // диван: ножки, сиденье с двумя подушками, спинка, подлокотники, декоративная подушка
-      u32 fab = RGB(70, 95, 145), fabD = RGB(58, 80, 125);
+      u32 fab = cA ? cA : RGB(70, 95, 145), fabD = cB ? cB : RGB(58, 80, 125);
       for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.4f, 0.04f, j * 0.25f, 0.025f, 0.04f, 0.025f, woodD);
       B(0, 0.17f, 0.02f, 0.46f, 0.09f, 0.32f, fabD);
       for (int i = -1; i <= 1; i += 2) B(i * 0.2f, 0.3f, 0.06f, 0.19f, 0.05f, 0.26f, fab);
@@ -1441,28 +1671,31 @@ static void drawFurn(int it, float cx, float cz, int rot) {
       B(0.27f, 0.42f, -0.12f, 0.08f, 0.07f, 0.03f, RGB(235, 190, 80));
     } break;
     case 2: {   // кровать: изголовье, рама, матрас, одеяло, две подушки
+      if (cA) { wood = cA; woodD = mixc(cA, RGB(0, 0, 0), 0.2f); }
       B(0, 0.12f, 0.04f, 0.42f, 0.1f, 0.44f, wood);
       B(0, 0.25f, 0.04f, 0.4f, 0.05f, 0.42f, white);
-      B(0, 0.31f, 0.14f, 0.405f, 0.02f, 0.32f, RGB(90, 130, 170));
+      B(0, 0.31f, 0.14f, 0.405f, 0.02f, 0.32f, cB ? cB : RGB(90, 130, 170));
       F(0, 0.333f, -0.16f, 0.405f, 0.004f, 0.03f, RGB(240, 240, 245));                // отворот одеяла
       for (int i = -1; i <= 1; i += 2) B(i * 0.18f, 0.33f, -0.32f, 0.15f, 0.045f, 0.08f, RGB(250, 250, 255));
       B(0, 0.5f, -0.44f, 0.44f, 0.38f, 0.035f, woodD);
       F(0, 0.62f, -0.405f, 0.36f, 0.18f, 0.002f, wood);
     } break;
     case 3: {   // тумба и телевизор на подставке, светящийся экран, саундбар
-      B(0, 0.22f, 0.05f, 0.46f, 0.22f, 0.22f, RGB(60, 52, 48));
-      for (int i = -1; i <= 1; i += 2) { F(i * 0.23f, 0.22f, 0.272f, 0.21f, 0.19f, 0.002f, RGB(75, 66, 60)); F(i * 0.05f, 0.24f, 0.276f, 0.006f, 0.05f, 0.004f, metal); }
+      B(0, 0.22f, 0.05f, 0.46f, 0.22f, 0.22f, cA ? cA : RGB(60, 52, 48));
+      for (int i = -1; i <= 1; i += 2) { F(i * 0.23f, 0.22f, 0.272f, 0.21f, 0.19f, 0.002f, cA ? mixc(cA, RGB(0, 0, 0), 0.06f) : RGB(75, 66, 60)); F(i * 0.05f, 0.24f, 0.276f, 0.006f, 0.05f, 0.004f, metal); }
       B(0, 0.46f, 0.0f, 0.08f, 0.015f, 0.06f, RGB(30, 30, 34)); B(0, 0.52f, -0.03f, 0.02f, 0.06f, 0.015f, RGB(30, 30, 34));
       B(0, 0.8f, -0.03f, 0.44f, 0.26f, 0.015f, RGB(18, 18, 22));
       F(0, 0.8f, -0.012f, 0.42f, 0.24f, 0.002f, RGB(60, 110, 170)); F(-0.15f, 0.88f, -0.009f, 0.12f, 0.06f, 0.001f, RGB(110, 170, 220));
       B(0, 0.465f, 0.18f, 0.25f, 0.025f, 0.035f, RGB(25, 25, 28));
     } break;
     case 4: {   // шкаф: две створки, ручки, карниз
-      B(0, 1.0f, -0.12f, 0.45f, 1.0f, 0.3f, RGB(210, 180, 135));
-      F(0, 1.0f, 0.182f, 0.003f, 0.95f, 0.002f, RGB(160, 130, 95));
+      u32 bd = cA ? cA : RGB(210, 180, 135);
+      B(0, 1.0f, -0.12f, 0.45f, 1.0f, 0.3f, bd);
+      F(0, 1.0f, 0.182f, 0.003f, 0.95f, 0.002f, mixc(bd, RGB(0, 0, 0), 0.25f));
       for (int i = -1; i <= 1; i += 2) F(i * 0.06f, 1.05f, 0.19f, 0.008f, 0.1f, 0.006f, metal);
-      B(0, 2.02f, -0.12f, 0.47f, 0.025f, 0.32f, RGB(190, 160, 120));
-      B(0, 0.04f, -0.12f, 0.44f, 0.04f, 0.29f, RGB(120, 95, 70));
+      B(0, 2.02f, -0.12f, 0.47f, 0.025f, 0.32f, mixc(bd, RGB(0, 0, 0), 0.1f));
+      B(0, 0.04f, -0.12f, 0.44f, 0.04f, 0.29f, mixc(bd, RGB(0, 0, 0), 0.42f));
+      if (it == 24) for (int i = -1; i <= 1; i += 2) F(i * 0.23f, 1.0f, 0.184f, 0.17f, 0.8f, 0.002f, mixc(bd, RGB(255, 220, 150), 0.12f));   // филёнки у классики
     } break;
     case 5: {   // холодильник: морозилка и основная дверь, ручки
       B(0, 0.9f, -0.08f, 0.31f, 0.9f, 0.3f, RGB(232, 235, 240));
@@ -1521,7 +1754,7 @@ static void drawFurn(int it, float cx, float cz, int rot) {
       B(0, 1.62f, 0, 0.17f, 0.12f, 0.17f, RGB(250, 235, 190)); F(0, 1.5f, 0, 0.12f, 0.003f, 0.12f, RGB(255, 250, 220));
     } break;
     case 14: {  // кресло
-      u32 fab = RGB(160, 110, 80), fabD = RGB(135, 90, 65);
+      u32 fab = cA ? cA : RGB(160, 110, 80), fabD = cB ? cB : RGB(135, 90, 65);
       B(0, 0.2f, 0.02f, 0.3f, 0.1f, 0.3f, fabD); B(0, 0.33f, 0.06f, 0.24f, 0.05f, 0.25f, fab);
       B(0, 0.55f, -0.25f, 0.3f, 0.25f, 0.07f, fab);
       for (int i = -1; i <= 1; i += 2) B(i * 0.27f, 0.38f, 0.02f, 0.05f, 0.12f, 0.3f, fabD);
@@ -1533,6 +1766,7 @@ static void drawFurn(int it, float cx, float cz, int rot) {
       B(0.12f, 0.395f, 0.05f, 0.08f, 0.012f, 0.06f, RGB(180, 60, 60)); B(-0.15f, 0.4f, -0.05f, 0.04f, 0.02f, 0.04f, white);
     } break;
     case 16: {  // книжный шкаф: полки с книгами разного цвета
+      if (cA) { woodD = cB; wood = cA; }
       B(0, 0.95f, -0.25f, 0.45f, 0.95f, 0.04f, woodD);
       for (int i = -1; i <= 1; i += 2) B(i * 0.43f, 0.95f, -0.1f, 0.02f, 0.95f, 0.17f, wood);
       for (int s = 0; s < 5; s++) { float y = 0.08f + s * 0.42f; B(0, y, -0.1f, 0.42f, 0.015f, 0.17f, wood);
@@ -1540,11 +1774,12 @@ static void drawFurn(int it, float cx, float cz, int rot) {
           B(-0.36f + bk * 0.09f, y + 0.015f + h, -0.08f, 0.035f, h, 0.12f, bc); } }
     } break;
     case 17: {  // кухонный шкаф: нижняя тумба со столешницей, верхний шкаф, фартук
-      B(0, 0.42f, -0.18f, 0.48f, 0.42f, 0.28f, RGB(235, 235, 238));
-      B(0, 0.87f, -0.18f, 0.5f, 0.025f, 0.3f, RGB(110, 85, 65));
-      for (int i = -1; i <= 1; i += 2) { F(i * 0.24f, 0.42f, 0.102f, 0.22f, 0.38f, 0.002f, RGB(225, 225, 230)); F(i * 0.05f, 0.62f, 0.107f, 0.006f, 0.06f, 0.004f, metal); }
+      u32 kb = cA ? cA : RGB(235, 235, 238);
+      B(0, 0.42f, -0.18f, 0.48f, 0.42f, 0.28f, kb);
+      B(0, 0.87f, -0.18f, 0.5f, 0.025f, 0.3f, cB ? cB : RGB(110, 85, 65));
+      for (int i = -1; i <= 1; i += 2) { F(i * 0.24f, 0.42f, 0.102f, 0.22f, 0.38f, 0.002f, mixc(kb, RGB(0, 0, 0), 0.05f)); F(i * 0.05f, 0.62f, 0.107f, 0.006f, 0.06f, 0.004f, metal); }
       F(0, 1.15f, -0.455f, 0.48f, 0.25f, 0.003f, RGB(200, 225, 230));
-      B(0, 1.75f, -0.3f, 0.48f, 0.3f, 0.16f, RGB(235, 235, 238)); F(0, 1.75f, -0.138f, 0.003f, 0.28f, 0.002f, RGB(200, 200, 205));
+      B(0, 1.75f, -0.3f, 0.48f, 0.3f, 0.16f, kb); F(0, 1.75f, -0.138f, 0.003f, 0.28f, 0.002f, RGB(200, 200, 205));
       B(0.2f, 0.94f, -0.25f, 0.08f, 0.05f, 0.06f, RGB(90, 90, 96));   // чайник
     } break;
     case 18: {  // стиральная машина: круглая дверца, панель
@@ -1552,6 +1787,289 @@ static void drawFurn(int it, float cx, float cz, int rot) {
       F(0, 0.78f, 0.242f, 0.29f, 0.06f, 0.002f, RGB(215, 218, 225)); F(0.18f, 0.78f, 0.246f, 0.03f, 0.03f, 0.002f, RGB(60, 60, 66));
       for (int k = 0; k < 8; k++) { float a = k * 0.785f; F(cosf(a) * 0.15f, 0.38f + sinf(a) * 0.15f, 0.243f, 0.06f, 0.06f, 0.002f, metal); }
       F(0, 0.38f, 0.246f, 0.12f, 0.12f, 0.002f, RGB(120, 150, 180)); F(0.06f, 0.43f, 0.248f, 0.03f, 0.03f, 0.001f, RGB(200, 220, 240));
+    } break;
+    case FU_CRIB: {   // детская кроватка: рама с прутьями, матрас, одеяло с рисунком, мобиль с игрушками
+      u32 fr = RGB(240, 236, 228);
+      for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.36f, 0.42f, j * 0.24f, 0.025f, 0.42f, 0.025f, fr);
+      B(0, 0.25f, 0, 0.35f, 0.03f, 0.23f, fr); B(0, 0.3f, 0, 0.34f, 0.04f, 0.22f, RGB(250, 250, 252));
+      B(0.08f, 0.35f, 0, 0.24f, 0.015f, 0.21f, RGB(160, 200, 230)); F(0.05f, 0.368f, 0.05f, 0.04f, 0.002f, 0.04f, RGB(250, 210, 90));
+      B(-0.25f, 0.37f, 0, 0.07f, 0.03f, 0.12f, RGB(255, 255, 255));
+      for (int j = -1; j <= 1; j += 2) { B(0, 0.8f, j * 0.24f, 0.36f, 0.02f, 0.02f, fr); for (int k = 0; k < 9; k++) B(-0.32f + k * 0.08f, 0.56f, j * 0.24f, 0.008f, 0.22f, 0.008f, fr); }
+      for (int i = -1; i <= 1; i += 2) { B(i * 0.36f, 0.56f, 0, 0.012f, 0.22f, 0.22f, fr); }
+      B(0.36f, 1.05f, 0, 0.01f, 0.25f, 0.01f, RGB(200, 200, 205)); B(0.2f, 1.3f, 0, 0.16f, 0.008f, 0.008f, RGB(200, 200, 205));
+      for (int k = 0; k < 3; k++) B(0.06f + (k - 1) * 0.08f, 1.2f, (k - 1) * 0.06f, 0.025f, 0.025f, 0.025f, k == 0 ? RGB(240, 120, 120) : k == 1 ? RGB(120, 200, 140) : RGB(250, 210, 90));
+    } break;
+    case FU_DESK: {   // рабочий стол: столешница, ножки, тумба, монитор, клавиатура, офисное кресло
+      B(0, 0.74f, -0.12f, 0.46f, 0.02f, 0.26f, RGB(235, 235, 232));
+      for (int i = -1; i <= 1; i += 2) B(i * 0.42f, 0.36f, -0.12f, 0.02f, 0.36f, 0.24f, RGB(50, 50, 54));
+      B(0.28f, 0.3f, -0.12f, 0.12f, 0.28f, 0.22f, RGB(225, 225, 222)); F(0.28f, 0.45f, 0.102f, 0.1f, 0.003f, 0.002f, RGB(150, 150, 155));
+      B(-0.05f, 0.77f, -0.26f, 0.08f, 0.01f, 0.05f, RGB(30, 30, 34)); B(-0.05f, 0.86f, -0.28f, 0.015f, 0.09f, 0.012f, RGB(30, 30, 34));
+      B(-0.05f, 1.06f, -0.27f, 0.27f, 0.15f, 0.012f, RGB(20, 20, 24)); F(-0.05f, 1.06f, -0.256f, 0.25f, 0.13f, 0.002f, RGB(40, 90, 150));
+      F(-0.12f, 1.1f, -0.253f, 0.1f, 0.012f, 0.001f, RGB(120, 220, 140)); F(-0.1f, 1.06f, -0.253f, 0.12f, 0.008f, 0.001f, RGB(220, 220, 240)); F(-0.14f, 1.02f, -0.253f, 0.08f, 0.008f, 0.001f, RGB(240, 180, 90));   // код на экране
+      B(-0.05f, 0.765f, -0.04f, 0.18f, 0.008f, 0.06f, RGB(40, 40, 44)); B(0.2f, 0.765f, -0.03f, 0.03f, 0.008f, 0.045f, RGB(40, 40, 44));
+      B(0.36f, 0.95f, -0.3f, 0.05f, 0.2f, 0.05f, RGB(30, 30, 34)); F(0.36f, 0.98f, -0.248f, 0.002f, 0.12f, 0.002f, RGB(80, 220, 255));   // системный блок с подсветкой
+      B(-0.05f, 0.46f, 0.3f, 0.2f, 0.04f, 0.19f, RGB(40, 42, 50)); B(-0.05f, 0.75f, 0.48f, 0.19f, 0.25f, 0.03f, RGB(40, 42, 50));
+      B(-0.05f, 0.24f, 0.3f, 0.025f, 0.2f, 0.025f, RGB(120, 120, 126));
+      for (int k = 0; k < 5; k++) { float a = k * 1.2566f; B(-0.05f + cosf(a) * 0.16f, 0.03f, 0.3f + sinf(a) * 0.16f, 0.025f, 0.02f, 0.025f, RGB(30, 30, 34)); }
+    } break;
+    case FU_SIDEBOARD: {   // старый сервант: лакированный корпус, стекло с хрусталём и сервизом, нижние дверцы
+      u32 lac = RGB(105, 62, 38), lacD = RGB(80, 46, 28);
+      B(0, 0.95f, -0.18f, 0.48f, 0.95f, 0.24f, lac);
+      F(0, 1.35f, 0.062f, 0.44f, 0.45f, 0.002f, RGB(140, 160, 165));               // стекло
+      for (int sh2 = 0; sh2 < 2; sh2++) { F(0, 1.08f + sh2 * 0.32f, 0.03f, 0.43f, 0.008f, 0.03f, lacD);
+        for (int k = 0; k < 6; k++) F(-0.33f + k * 0.13f, 1.18f + sh2 * 0.32f, 0.066f, 0.045f, 0.08f, 0.001f, k % 2 ? RGB(240, 240, 245) : RGB(200, 225, 235)); }   // тарелки и хрусталь
+      for (int i = -1; i <= 1; i += 2) { F(i * 0.24f, 0.45f, 0.062f, 0.21f, 0.38f, 0.002f, lacD); F(i * 0.04f, 0.5f, 0.066f, 0.008f, 0.03f, 0.004f, RGB(200, 180, 100)); }
+      B(0, 1.92f, -0.18f, 0.5f, 0.03f, 0.26f, lacD);
+    } break;
+    case FU_OLDTV: {   // старый телевизор: пузатый кинескоп на тумбочке, антенна «рога»
+      B(0, 0.28f, 0, 0.32f, 0.28f, 0.22f, RGB(120, 80, 50));
+      for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.28f, 0.03f, j * 0.18f, 0.02f, 0.03f, 0.02f, RGB(80, 55, 35));
+      B(0, 0.82f, -0.04f, 0.3f, 0.26f, 0.24f, RGB(60, 58, 55)); B(0, 0.82f, -0.25f, 0.2f, 0.18f, 0.1f, RGB(55, 52, 50));
+      F(-0.05f, 0.84f, 0.203f, 0.2f, 0.18f, 0.002f, RGB(70, 85, 80)); F(-0.1f, 0.9f, 0.206f, 0.06f, 0.04f, 0.001f, RGB(105, 125, 118));
+      for (int k = 0; k < 3; k++) F(0.22f, 0.95f - k * 0.08f, 0.205f, 0.02f, 0.02f, 0.002f, RGB(180, 175, 160));
+      for (int i = -1; i <= 1; i += 2) drawBox(L(i * 0.1f, 1.25f, -0.05f), v3(0.006f, 0.2f, 0.006f), yawF + i * 0.5f, RGB(170, 170, 175), true);
+    } break;
+    case FU_CORNER: {   // угловой диван: длинная часть и оттоманка справа, подушки
+      u32 fab = cA ? cA : RGB(120, 128, 140), fabD = cB ? cB : mixc(fab, RGB(0, 0, 0), 0.18f);
+      B(0, 0.15f, -0.12f, 0.47f, 0.09f, 0.22f, fabD); B(0.27f, 0.15f, 0.14f, 0.2f, 0.09f, 0.3f, fabD);
+      for (int i = 0; i < 3; i++) B(-0.32f + i * 0.31f, 0.28f, -0.1f, 0.15f, 0.05f, 0.18f, fab);
+      B(0.27f, 0.28f, 0.2f, 0.19f, 0.05f, 0.22f, fab);
+      B(0, 0.45f, -0.38f, 0.47f, 0.2f, 0.07f, fabD); B(-0.43f, 0.32f, -0.12f, 0.05f, 0.14f, 0.22f, fabD);
+      for (int i = 0; i < 3; i++) B(-0.3f + i * 0.3f, 0.47f, -0.29f, 0.13f, 0.13f, 0.04f, fab);
+      B(-0.25f, 0.4f, -0.22f, 0.07f, 0.07f, 0.025f, RGB(230, 200, 90)); B(0.32f, 0.38f, -0.22f, 0.07f, 0.07f, 0.025f, RGB(200, 90, 80));
+      for (int k = 0; k < 4; k++) B(-0.42f + k * 0.28f, 0.03f, 0.06f, 0.02f, 0.03f, 0.02f, RGB(40, 40, 44));
+    } break;
+    case FU_BEANBAG: {   // кресло-мешок: бесформенная груша из нескольких «складок»
+      u32 fab = cA ? cA : RGB(230, 130, 60), fabD = mixc(fab, RGB(0, 0, 0), 0.2f);
+      B(0, 0.12f, 0.02f, 0.3f, 0.12f, 0.3f, fabD); B(0, 0.24f, 0.06f, 0.26f, 0.06f, 0.24f, fab);
+      B(0, 0.42f, -0.18f, 0.26f, 0.2f, 0.1f, fab); B(0, 0.6f, -0.2f, 0.18f, 0.06f, 0.08f, fabD);
+      for (int i = -1; i <= 1; i += 2) B(i * 0.25f, 0.28f, -0.02f, 0.06f, 0.1f, 0.2f, fab);
+    } break;
+    case FU_DRESSER: {   // комод: корпус, три ящика с ручками, на нём лампа и фото
+      u32 bd = cA ? cA : RGB(205, 175, 130), hd = cB ? cB : metal;
+      B(0, 0.42f, -0.2f, 0.44f, 0.4f, 0.23f, bd); B(0, 0.83f, -0.2f, 0.46f, 0.015f, 0.25f, mixc(bd, RGB(0, 0, 0), 0.15f));
+      for (int k = 0; k < 3; k++) { F(0, 0.18f + k * 0.24f, 0.032f, 0.41f, 0.105f, 0.002f, mixc(bd, RGB(0, 0, 0), 0.07f)); for (int i = -1; i <= 1; i += 2) F(i * 0.2f, 0.2f + k * 0.24f, 0.036f, 0.05f, 0.012f, 0.006f, hd); }
+      for (int i = -1; i <= 1; i += 2) B(i * 0.4f, 0.02f, 0.0f, 0.02f, 0.02f, 0.02f, mixc(bd, RGB(0, 0, 0), 0.4f));
+      B(-0.25f, 0.88f, -0.25f, 0.06f, 0.04f, 0.06f, RGB(90, 90, 96)); B(-0.25f, 1.03f, -0.25f, 0.1f, 0.09f, 0.1f, RGB(250, 236, 200));
+      B(0.2f, 0.93f, -0.32f, 0.08f, 0.09f, 0.01f, RGB(40, 40, 44)); F(0.2f, 0.93f, -0.308f, 0.06f, 0.07f, 0.001f, RGB(150, 190, 220));
+    } break;
+    case FU_NIGHT: {   // прикроватная тумба с ящиком, ночник, книга, будильник
+      u32 bd = cA ? cA : RGB(190, 150, 105);
+      B(0, 0.25f, -0.25f, 0.22f, 0.23f, 0.2f, bd); B(0, 0.49f, -0.25f, 0.23f, 0.012f, 0.21f, mixc(bd, RGB(0, 0, 0), 0.15f));
+      F(0, 0.36f, -0.048f, 0.2f, 0.09f, 0.002f, mixc(bd, RGB(0, 0, 0), 0.08f)); F(0, 0.37f, -0.044f, 0.05f, 0.01f, 0.005f, cB ? cB : metal);
+      for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.19f, 0.01f, -0.25f + j * 0.17f, 0.015f, 0.01f, 0.015f, RGB(50, 50, 54));
+      B(-0.08f, 0.53f, -0.3f, 0.04f, 0.03f, 0.04f, RGB(70, 70, 76)); B(-0.08f, 0.66f, -0.3f, 0.08f, 0.07f, 0.08f, RGB(255, 240, 200));
+      B(0.1f, 0.515f, -0.2f, 0.07f, 0.012f, 0.05f, RGB(60, 110, 160)); B(0.12f, 0.55f, -0.33f, 0.03f, 0.03f, 0.015f, RGB(220, 60, 60));
+    } break;
+    case FU_BUNK: {   // двухъярусная кровать: стойки, два матраса, лесенка, бортик
+      u32 fr = cA ? cA : RGB(235, 225, 205);
+      for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.42f, 0.85f, j * 0.4f, 0.03f, 0.85f, 0.03f, fr);
+      for (int lv = 0; lv < 2; lv++) { float y = 0.25f + lv * 0.95f; B(0, y, 0, 0.42f, 0.04f, 0.4f, fr); B(0, y + 0.08f, 0, 0.4f, 0.05f, 0.38f, white);
+        B(0, y + 0.14f, 0.08f, 0.405f, 0.015f, 0.3f, lv ? RGB(90, 150, 210) : RGB(220, 110, 110)); B(0, y + 0.16f, -0.3f, 0.3f, 0.04f, 0.07f, RGB(250, 250, 255)); }
+      B(0, 1.5f, 0.4f, 0.42f, 0.03f, 0.02f, fr); B(0, 1.5f, -0.4f, 0.42f, 0.03f, 0.02f, fr);
+      for (int k = 0; k < 4; k++) B(0.3f, 0.35f + k * 0.28f, 0.44f, 0.1f, 0.015f, 0.015f, fr);
+      B(0.2f, 0.8f, 0.44f, 0.015f, 0.8f, 0.015f, fr);
+    } break;
+    case FU_VANITYT: {   // туалетный столик: столешница, ящички, круглое зеркало с лампочками, пуфик
+      u32 bd = cA ? cA : RGB(240, 236, 228), acc = cB ? cB : RGB(220, 190, 120);
+      B(0, 0.74f, -0.25f, 0.42f, 0.02f, 0.2f, bd);
+      for (int i = -1; i <= 1; i += 2) { B(i * 0.3f, 0.48f, -0.25f, 0.11f, 0.24f, 0.19f, bd); F(i * 0.3f, 0.6f, -0.058f, 0.09f, 0.08f, 0.002f, mixc(bd, RGB(0, 0, 0), 0.06f)); F(i * 0.3f, 0.6f, -0.054f, 0.03f, 0.01f, 0.004f, acc); B(i * 0.3f, 0.12f, -0.25f, 0.02f, 0.12f, 0.02f, acc); }
+      B(0, 1.15f, -0.43f, 0.27f, 0.32f, 0.015f, acc); F(0, 1.15f, -0.413f, 0.24f, 0.29f, 0.002f, RGB(195, 220, 235)); F(-0.08f, 1.24f, -0.41f, 0.06f, 0.1f, 0.001f, RGB(230, 245, 250));
+      for (int k = 0; k < 6; k++) F((k % 2 ? 1 : -1) * 0.25f, 0.92f + (k / 2) * 0.2f, -0.41f, 0.025f, 0.025f, 0.006f, RGB(255, 245, 200));
+      B(-0.1f, 0.78f, -0.3f, 0.025f, 0.04f, 0.025f, RGB(230, 120, 160)); B(0.08f, 0.77f, -0.3f, 0.04f, 0.025f, 0.03f, RGB(60, 60, 66));
+      B(0, 0.22f, 0.2f, 0.16f, 0.06f, 0.16f, RGB(235, 180, 190)); B(0, 0.08f, 0.2f, 0.02f, 0.08f, 0.02f, acc);
+    } break;
+    case FU_PIANO: {   // пианино: корпус, клавиатура с чёрными клавишами, пюпитр с нотами, банкетка
+      u32 lac = RGB(28, 24, 24);
+      B(0, 0.65f, -0.28f, 0.47f, 0.65f, 0.17f, lac); B(0, 1.31f, -0.28f, 0.48f, 0.02f, 0.18f, RGB(45, 40, 40));
+      B(0, 0.72f, -0.03f, 0.45f, 0.03f, 0.1f, lac); F(0, 0.755f, -0.01f, 0.43f, 0.004f, 0.07f, RGB(245, 243, 235));
+      for (int k = 0; k < 15; k++) if (k % 7 != 2 && k % 7 != 6) F(-0.4f + k * 0.057f, 0.762f, -0.04f, 0.012f, 0.005f, 0.04f, RGB(20, 20, 20));
+      F(0, 0.98f, -0.108f, 0.3f, 0.12f, 0.002f, RGB(250, 248, 238)); for (int k = 0; k < 4; k++) F(0, 0.93f + k * 0.035f, -0.104f, 0.26f, 0.002f, 0.001f, RGB(90, 90, 90));
+      for (int i = -1; i <= 1; i += 2) B(i * 0.42f, 0.35f, -0.02f, 0.04f, 0.35f, 0.04f, lac);
+      F(-0.3f, 1.34f, -0.3f, 0.04f, 0.02f, 0.04f, RGB(200, 170, 80)); B(0.25f, 1.42f, -0.3f, 0.05f, 0.09f, 0.05f, RGB(200, 60, 70));   // метроном и ваза
+      B(0, 0.45f, 0.3f, 0.3f, 0.04f, 0.14f, RGB(40, 30, 30)); for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.27f, 0.21f, 0.3f + j * 0.11f, 0.02f, 0.21f, 0.02f, lac);
+    } break;
+    case FU_AQUA: {   // аквариум на тумбе: стекло, вода, водоросли, рыбки, подсветка
+      B(0, 0.38f, -0.15f, 0.46f, 0.38f, 0.22f, RGB(40, 40, 46));
+      B(0, 1.04f, -0.15f, 0.44f, 0.28f, 0.2f, RGB(60, 140, 170)); F(0, 1.04f, 0.052f, 0.43f, 0.27f, 0.002f, RGB(110, 190, 215));
+      F(0, 0.79f, 0.054f, 0.43f, 0.03f, 0.001f, RGB(220, 200, 150));
+      for (int k = 0; k < 5; k++) F(-0.35f + k * 0.17f, 0.9f + (k % 2) * 0.04f, 0.056f, 0.015f, 0.1f + (k % 3) * 0.03f, 0.001f, RGB(50, 150, 70));
+      for (int k = 0; k < 4; k++) { float t = (float)k * 1.7f; F(-0.25f + fmodf(t * 0.37f, 0.55f), 1.0f + (k % 3) * 0.08f, 0.057f, 0.03f, 0.015f, 0.001f, k % 2 ? RGB(255, 140, 40) : RGB(250, 220, 60)); }
+      B(0, 1.34f, -0.15f, 0.45f, 0.02f, 0.21f, RGB(30, 30, 34));
+    } break;
+    case FU_FIRE: {   // электрокамин: портал, топка с «огнём», полка, свечи и часы
+      u32 st = cA ? cA : RGB(236, 228, 214), dk = cB ? cB : mixc(st, RGB(0, 0, 0), 0.15f);
+      B(0, 0.5f, -0.32f, 0.47f, 0.5f, 0.14f, st); B(0, 1.02f, -0.3f, 0.5f, 0.03f, 0.18f, dk);
+      F(0, 0.42f, -0.178f, 0.28f, 0.24f, 0.002f, RGB(20, 18, 18));
+      for (int k = 0; k < 5; k++) F(-0.18f + k * 0.09f, 0.3f + (k % 2) * 0.05f, -0.175f, 0.04f, 0.08f + (k % 3) * 0.03f, 0.001f, k % 2 ? RGB(255, 150, 40) : RGB(255, 210, 80));
+      F(0, 0.22f, -0.174f, 0.24f, 0.03f, 0.001f, RGB(120, 60, 30));
+      B(0, 0.05f, -0.2f, 0.48f, 0.05f, 0.08f, dk);
+      for (int i = -1; i <= 1; i += 2) B(i * 0.35f, 1.12f, -0.32f, 0.025f, 0.07f, 0.025f, RGB(250, 245, 230));
+      B(0, 1.15f, -0.34f, 0.08f, 0.1f, 0.03f, RGB(180, 150, 90)); F(0, 1.15f, -0.308f, 0.06f, 0.07f, 0.001f, RGB(245, 240, 225));
+    } break;
+    case FU_MONSTERA: {   // большое растение в кадке: высокий стебель и крупные листья веером
+      B(0, 0.2f, 0, 0.18f, 0.2f, 0.18f, cA ? cA : RGB(225, 222, 215)); F(0, 0.41f, 0, 0.16f, 0.004f, 0.16f, RGB(70, 50, 35));
+      for (int k = 0; k < 3; k++) B((k - 1) * 0.05f, 0.75f + k * 0.08f, (k - 1) * 0.03f, 0.015f, 0.35f + k * 0.05f, 0.015f, RGB(70, 120, 60));
+      for (int k = 0; k < 9; k++) { float a = k * 0.7f, r = 0.15f + (k % 3) * 0.06f; drawBox(L(cosf(a) * r, 0.75f + k * 0.09f, sinf(a) * r), v3(0.18f, 0.012f, 0.1f), yawF + a, k % 2 ? RGB(40, 120, 55) : RGB(60, 150, 70), true); }
+    } break;
+    case FU_HANG: {   // подвесное кресло-кокон: стойка-дуга, плетёная чаша, подушка
+      u32 rat = cA ? cA : RGB(205, 175, 125);
+      B(0, 0.03f, 0, 0.26f, 0.03f, 0.26f, RGB(40, 40, 44)); B(-0.26f, 0.95f, 0, 0.025f, 0.92f, 0.025f, RGB(40, 40, 44)); B(-0.1f, 1.87f, 0, 0.18f, 0.025f, 0.025f, RGB(40, 40, 44));
+      B(0.06f, 1.6f, 0, 0.008f, 0.27f, 0.008f, RGB(60, 60, 64));
+      B(0.06f, 0.65f, 0, 0.24f, 0.2f, 0.24f, rat); B(0.06f, 1.02f, -0.12f, 0.2f, 0.18f, 0.1f, rat);
+      for (int k = 0; k < 4; k++) F(0.06f, 0.5f + k * 0.12f, 0.243f, 0.22f, 0.008f, 0.002f, mixc(rat, RGB(0, 0, 0), 0.2f));
+      B(0.06f, 0.88f, 0.03f, 0.19f, 0.04f, 0.18f, cB ? cB : RGB(245, 245, 240));
+    } break;
+    case FU_GAMER: {   // игровой уголок: стол с RGB-подсветкой, два монитора, игровое кресло, колонки
+      B(0, 0.74f, -0.2f, 0.47f, 0.02f, 0.22f, RGB(25, 25, 28)); F(0, 0.715f, 0.02f, 0.46f, 0.006f, 0.002f, RGB(255, 40, 200));
+      for (int i = -1; i <= 1; i += 2) B(i * 0.42f, 0.36f, -0.2f, 0.03f, 0.36f, 0.18f, RGB(20, 20, 22));
+      for (int i = -1; i <= 1; i += 2) { drawBox(L(i * 0.22f, 1.04f, -0.32f), v3(0.21f, 0.13f, 0.01f), yawF - i * 0.25f, RGB(15, 15, 18), true); drawBox(L(i * 0.22f, 1.04f, -0.31f), v3(0.19f, 0.11f, 0.002f), yawF - i * 0.25f, i < 0 ? RGB(60, 40, 140) : RGB(30, 120, 90), false); }
+      B(0, 0.77f, -0.08f, 0.2f, 0.008f, 0.06f, RGB(30, 30, 34)); F(0, 0.78f, -0.08f, 0.18f, 0.002f, 0.04f, RGB(80, 220, 255)); B(0.28f, 0.765f, -0.08f, 0.1f, 0.003f, 0.08f, RGB(255, 60, 60));
+      for (int i = -1; i <= 1; i += 2) B(i * 0.43f, 0.86f, -0.35f, 0.035f, 0.1f, 0.035f, RGB(30, 30, 34));
+      B(0, 0.46f, 0.3f, 0.21f, 0.05f, 0.19f, RGB(30, 30, 34)); B(0, 0.85f, 0.48f, 0.2f, 0.33f, 0.04f, RGB(30, 30, 34));
+      for (int i = -1; i <= 1; i += 2) F(i * 0.12f, 0.85f, 0.438f, 0.03f, 0.3f, 0.002f, RGB(220, 30, 40));
+      B(0, 1.12f, 0.43f, 0.1f, 0.05f, 0.02f, RGB(220, 30, 40)); B(0, 0.24f, 0.3f, 0.025f, 0.2f, 0.025f, RGB(120, 120, 126));
+      for (int k = 0; k < 5; k++) { float a = k * 1.2566f; B(cosf(a) * 0.17f, 0.03f, 0.3f + sinf(a) * 0.17f, 0.025f, 0.02f, 0.025f, RGB(30, 30, 34)); }
+    } break;
+    case FU_TREAD: {   // беговая дорожка: полотно, поручни, стойки, пульт
+      B(0, 0.08f, 0.05f, 0.3f, 0.08f, 0.44f, RGB(40, 40, 44)); F(0, 0.165f, 0.08f, 0.23f, 0.004f, 0.38f, RGB(25, 25, 28));
+      for (int i = -1; i <= 1; i += 2) { B(i * 0.27f, 0.65f, -0.34f, 0.025f, 0.55f, 0.025f, RGB(170, 172, 178)); B(i * 0.27f, 1.05f, -0.15f, 0.02f, 0.02f, 0.2f, RGB(170, 172, 178)); }
+      B(0, 1.2f, -0.36f, 0.25f, 0.1f, 0.05f, RGB(50, 50, 56)); F(0, 1.22f, -0.308f, 0.16f, 0.06f, 0.002f, RGB(90, 200, 240));
+      F(0, 0.17f, 0.46f, 0.3f, 0.02f, 0.01f, RGB(240, 200, 40));
+    } break;
+    case FU_AUDIO: {   // винил и колонки: тумба с пластинками, проигрыватель, две высокие колонки
+      u32 wd = cA ? cA : RGB(120, 84, 56);
+      B(0, 0.3f, -0.22f, 0.25f, 0.3f, 0.2f, wd); for (int k = 0; k < 12; k++) F(-0.2f + k * 0.035f, 0.2f, -0.018f, 0.012f, 0.15f, 0.002f, k % 3 == 0 ? RGB(200, 60, 50) : (k % 3 == 1 ? RGB(30, 30, 30) : RGB(230, 200, 90)));
+      B(0, 0.63f, -0.22f, 0.2f, 0.03f, 0.16f, RGB(40, 40, 44)); F(-0.03f, 0.665f, -0.22f, 0.12f, 0.003f, 0.12f, RGB(20, 20, 20)); F(-0.03f, 0.668f, -0.22f, 0.04f, 0.002f, 0.04f, RGB(220, 70, 60));
+      B(0.14f, 0.68f, -0.28f, 0.01f, 0.01f, 0.1f, metal);
+      for (int i = -1; i <= 1; i += 2) { B(i * 0.38f, 0.55f, -0.25f, 0.09f, 0.55f, 0.13f, cB ? cB : RGB(30, 28, 26)); F(i * 0.38f, 0.75f, -0.118f, 0.06f, 0.06f, 0.002f, RGB(70, 70, 74)); F(i * 0.38f, 0.38f, -0.118f, 0.075f, 0.075f, 0.002f, RGB(60, 60, 64)); F(i * 0.38f, 0.38f, -0.115f, 0.03f, 0.03f, 0.001f, RGB(110, 110, 116)); }
+    } break;
+    case FU_ROUND: {   // круглый обеденный стол на одной ножке и четыре стула вокруг
+      u32 tp = cA ? cA : RGB(225, 215, 195), lg = cB ? cB : woodD;
+      for (int k = 0; k < 8; k++) drawBox(L(0, 0.74f, 0), v3(0.3f, 0.02f, 0.125f), yawF + k * 0.3927f, tp, true);
+      B(0, 0.38f, 0, 0.04f, 0.36f, 0.04f, lg); B(0, 0.03f, 0, 0.18f, 0.03f, 0.18f, lg);
+      B(0, 0.8f, 0, 0.05f, 0.05f, 0.05f, RGB(240, 240, 245)); F(0, 0.87f, 0, 0.04f, 0.03f, 0.04f, RGB(250, 180, 60));
+      for (int k = 0; k < 4; k++) { float a = k * 1.5708f; V3 o = L(sinf(a) * 0.4f, 0, cosf(a) * 0.4f); float ya = yawF + a;
+        drawBox(o + v3(0, 0.43f, 0), v3(0.14f, 0.02f, 0.14f), ya, lg, true); { float cs2 = cosf(ya), sn2 = sinf(ya); drawBox(o + v3(sn2 * 0.13f, 0.66f, cs2 * 0.13f), v3(0.14f, 0.2f, 0.015f), ya, lg, true);
+        for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) drawBox(o + v3(cs2 * i * 0.11f + sn2 * j * 0.11f, 0.21f, -sn2 * i * 0.11f + cs2 * j * 0.11f), v3(0.015f, 0.21f, 0.015f), ya, lg, true); } }
+    } break;
+    case FU_BAR: {   // барная стойка: столешница на опоре, три высоких табурета, подвесные лампы
+      u32 tp = cA ? cA : RGB(140, 95, 60), bs = cB ? cB : RGB(40, 40, 44);
+      B(0, 1.05f, -0.22f, 0.47f, 0.03f, 0.2f, tp); B(0, 0.52f, -0.3f, 0.44f, 0.52f, 0.08f, bs);
+      F(0, 0.06f, -0.12f, 0.44f, 0.01f, 0.06f, metal);
+      for (int k = -1; k <= 1; k++) { B(k * 0.32f, 0.72f, 0.18f, 0.12f, 0.03f, 0.12f, tp); B(k * 0.32f, 0.36f, 0.18f, 0.02f, 0.36f, 0.02f, bs); B(k * 0.32f, 0.02f, 0.18f, 0.1f, 0.02f, 0.1f, bs); B(k * 0.32f, 0.3f, 0.18f, 0.08f, 0.01f, 0.08f, bs);
+        B(k * 0.32f, 2.1f, -0.22f, 0.004f, 0.5f, 0.004f, RGB(30, 30, 30)); B(k * 0.32f, 1.55f, -0.22f, 0.07f, 0.06f, 0.07f, bs); F(k * 0.32f, 1.48f, -0.22f, 0.05f, 0.005f, 0.05f, RGB(255, 230, 160)); }
+      B(-0.2f, 1.12f, -0.25f, 0.035f, 0.05f, 0.035f, RGB(120, 40, 50)); B(0.15f, 1.11f, -0.25f, 0.06f, 0.03f, 0.06f, RGB(240, 240, 240));
+    } break;
+    case FU_ISLAND: {   // кухонный остров: тумбы с двух сторон, столешница-камень, варочная панель, вытяжка
+      u32 bd = cA ? cA : RGB(60, 64, 72), tp = cB ? cB : RGB(235, 235, 238);
+      B(0, 0.42f, 0, 0.44f, 0.42f, 0.32f, bd); B(0, 0.87f, 0, 0.48f, 0.03f, 0.36f, tp);
+      for (int sd = -1; sd <= 1; sd += 2) for (int i = -1; i <= 1; i += 2) F(i * 0.22f, 0.42f, sd * 0.322f, 0.2f, 0.36f, 0.002f, mixc(bd, RGB(255, 255, 255), 0.05f));
+      F(0, 0.42f, 0.326f, 0.003f, 0.36f, 0.001f, mixc(bd, RGB(0, 0, 0), 0.3f));
+      F(-0.15f, 0.903f, 0, 0.2f, 0.003f, 0.2f, RGB(20, 20, 22)); for (int k = 0; k < 4; k++) F(-0.24f + (k % 2) * 0.18f, 0.906f, -0.09f + (k / 2) * 0.18f, 0.06f, 0.002f, 0.06f, RGB(60, 60, 66));
+      B(0.25f, 0.93f, 0.05f, 0.08f, 0.03f, 0.12f, RGB(200, 150, 100)); B(0.25f, 0.97f, 0.05f, 0.04f, 0.015f, 0.04f, RGB(220, 60, 50));
+      B(-0.15f, 2.35f, 0, 0.18f, 0.3f, 0.18f, RGB(190, 192, 198)); B(-0.15f, 1.95f, 0, 0.25f, 0.06f, 0.22f, RGB(190, 192, 198));
+    } break;
+    case FU_DISH: {   // посудомоечная машина под столешницей
+      B(0, 0.42f, -0.18f, 0.3f, 0.42f, 0.28f, RGB(220, 222, 228)); B(0, 0.87f, -0.18f, 0.32f, 0.025f, 0.3f, RGB(110, 85, 65));
+      F(0, 0.4f, 0.102f, 0.28f, 0.36f, 0.002f, RGB(200, 202, 210)); F(0, 0.79f, 0.105f, 0.28f, 0.04f, 0.002f, RGB(40, 40, 46));
+      for (int k = 0; k < 3; k++) F(-0.18f + k * 0.06f, 0.79f, 0.108f, 0.012f, 0.012f, 0.001f, k == 0 ? RGB(90, 220, 120) : RGB(120, 160, 220));
+      F(0, 0.7f, 0.108f, 0.2f, 0.012f, 0.008f, metal);
+      B(0.15f, 0.93f, -0.28f, 0.06f, 0.04f, 0.06f, RGB(245, 245, 245)); B(-0.12f, 0.95f, -0.3f, 0.03f, 0.06f, 0.03f, RGB(160, 210, 230));
+    } break;
+    case FU_OVEN: {   // пенал: встроенная духовка, микроволновка, верхний шкаф
+      u32 bd = cA ? cA : RGB(235, 235, 238);
+      B(0, 1.05f, -0.18f, 0.3f, 1.05f, 0.28f, bd);
+      F(0, 0.7f, 0.102f, 0.26f, 0.22f, 0.002f, RGB(30, 30, 34)); F(0, 0.66f, 0.105f, 0.2f, 0.13f, 0.001f, RGB(90, 60, 40)); F(0, 0.88f, 0.108f, 0.2f, 0.012f, 0.008f, metal);
+      F(0, 1.2f, 0.102f, 0.26f, 0.14f, 0.002f, RGB(30, 30, 34)); F(-0.05f, 1.2f, 0.105f, 0.17f, 0.1f, 0.001f, RGB(50, 60, 70)); F(0.2f, 1.2f, 0.105f, 0.04f, 0.1f, 0.001f, RGB(80, 220, 120));
+      F(0, 0.24f, 0.102f, 0.27f, 0.2f, 0.002f, mixc(bd, RGB(0, 0, 0), 0.05f)); F(0, 1.7f, 0.102f, 0.27f, 0.28f, 0.002f, mixc(bd, RGB(0, 0, 0), 0.05f));
+      F(0.2f, 0.4f, 0.106f, 0.008f, 0.05f, 0.004f, metal); F(0.2f, 1.5f, 0.106f, 0.008f, 0.05f, 0.004f, metal);
+    } break;
+    case FU_SHOWER: {   // душевая кабина: поддон, стеклянные стенки, профиль, лейка
+      u32 fr = cA ? cA : metal;
+      B(0, 0.08f, 0, 0.45f, 0.08f, 0.45f, white); F(0, 0.165f, 0, 0.4f, 0.003f, 0.4f, RGB(215, 228, 236)); F(0, 0.168f, 0, 0.05f, 0.002f, 0.05f, RGB(150, 150, 156));
+      F(0, 1.2f, -0.44f, 0.44f, 1.03f, 0.002f, RGB(235, 240, 240)); F(-0.44f, 1.2f, 0, 0.002f, 1.03f, 0.44f, RGB(200, 225, 235));
+      for (int k = 0; k < 4; k++) F(-0.44f + k * 0.29f, 1.2f, 0.44f, 0.12f, 1.03f, 0.002f, RGB(185, 215, 230));
+      for (int k = 0; k < 2; k++) { B(0.44f, 1.2f, (k ? 0.44f : -0.44f), 0.015f, 1.05f, 0.015f, fr); B(-0.44f, 1.2f, 0.44f, 0.015f, 1.05f, 0.015f, fr); }
+      B(0, 2.24f, 0.44f, 0.45f, 0.015f, 0.015f, fr); B(0.44f, 2.24f, 0, 0.015f, 0.015f, 0.45f, fr);
+      B(0.3f, 1.4f, -0.42f, 0.012f, 0.6f, 0.012f, fr); B(0.3f, 2.0f, -0.36f, 0.08f, 0.01f, 0.08f, fr); B(0.15f, 1.1f, -0.42f, 0.06f, 0.06f, 0.015f, fr);
+    } break;
+    case FU_TOWEL: {   // полотенцесушитель-лесенка и полка с полотенцами и баночками
+      for (int i = -1; i <= 1; i += 2) B(i * 0.2f, 1.1f, -0.45f, 0.015f, 0.45f, 0.015f, metal);
+      for (int k = 0; k < 6; k++) B(0, 0.75f + k * 0.14f, -0.45f, 0.2f, 0.01f, 0.012f, metal);
+      B(-0.05f, 1.15f, -0.43f, 0.12f, 0.2f, 0.01f, RGB(120, 180, 210));
+      B(0, 0.45f, -0.3f, 0.3f, 0.015f, 0.14f, RGB(225, 225, 228)); B(0, 0.2f, -0.3f, 0.3f, 0.015f, 0.14f, RGB(225, 225, 228));
+      for (int i = -1; i <= 1; i += 2) B(i * 0.29f, 0.25f, -0.3f, 0.012f, 0.25f, 0.012f, RGB(160, 160, 166));
+      for (int k = 0; k < 3; k++) B(-0.18f + k * 0.18f, 0.28f, -0.3f, 0.08f, 0.06f, 0.1f, k == 1 ? RGB(250, 250, 250) : RGB(240, 200, 180));
+      B(-0.15f, 0.5f, -0.3f, 0.03f, 0.05f, 0.03f, RGB(90, 170, 210)); B(0.05f, 0.52f, -0.3f, 0.03f, 0.07f, 0.03f, RGB(230, 120, 160)); B(0.2f, 0.49f, -0.3f, 0.04f, 0.04f, 0.04f, RGB(240, 240, 220));
+    } break;
+    case FU_JACUZZI: {   // джакузи: широкая чаша, вода с пузырями, подсветка, подголовники, ступенька
+      B(0, 0.3f, 0, 0.47f, 0.3f, 0.47f, white); B(0, 0.08f, 0.44f, 0.4f, 0.08f, 0.06f, RGB(160, 150, 140));
+      F(0, 0.605f, 0, 0.4f, 0.003f, 0.4f, RGB(90, 190, 225));
+      for (int k = 0; k < 10; k++) F(-0.3f + (k * 37 % 60) / 100.0f, 0.609f, -0.3f + (k * 53 % 60) / 100.0f, 0.02f, 0.002f, 0.02f, RGB(230, 248, 255));
+      F(0, 0.4f, 0.472f, 0.3f, 0.01f, 0.001f, RGB(80, 160, 255));
+      for (int i = -1; i <= 1; i += 2) B(i * 0.3f, 0.66f, -0.38f, 0.08f, 0.04f, 0.05f, RGB(70, 70, 76));
+      B(0.38f, 0.66f, 0.38f, 0.04f, 0.04f, 0.04f, metal);
+    } break;
+    case FU_COAT: {   // вешалка с обувницей: скамья с обувью, крючки с одеждой, полка для шапок
+      u32 wd2 = cA ? cA : RGB(160, 115, 75);
+      B(0, 0.42f, -0.3f, 0.42f, 0.02f, 0.15f, wd2); for (int i = -1; i <= 1; i += 2) B(i * 0.4f, 0.21f, -0.3f, 0.02f, 0.21f, 0.14f, wd2); B(0, 0.18f, -0.3f, 0.39f, 0.01f, 0.14f, wd2);
+      B(0, 0.47f, -0.3f, 0.35f, 0.03f, 0.13f, cB ? cB : RGB(90, 100, 120));
+      for (int k = 0; k < 3; k++) { B(-0.25f + k * 0.25f, 0.23f, -0.28f, 0.06f, 0.03f, 0.1f, k == 1 ? RGB(240, 240, 240) : RGB(40, 30, 28)); B(-0.25f + k * 0.25f, 0.04f, -0.25f, 0.07f, 0.04f, 0.12f, k == 2 ? RGB(150, 90, 60) : RGB(30, 30, 34)); }
+      B(0, 1.55f, -0.46f, 0.44f, 0.08f, 0.02f, wd2); B(0, 1.9f, -0.38f, 0.44f, 0.015f, 0.1f, wd2);
+      for (int k = 0; k < 4; k++) F(-0.33f + k * 0.22f, 1.55f, -0.43f, 0.015f, 0.015f, 0.03f, metal);
+      B(-0.25f, 1.15f, -0.38f, 0.14f, 0.38f, 0.06f, RGB(60, 70, 90)); B(0.2f, 1.2f, -0.38f, 0.12f, 0.33f, 0.05f, RGB(170, 60, 50)); B(0.25f, 1.96f, -0.38f, 0.08f, 0.05f, 0.08f, RGB(200, 180, 140));
+    } break;
+    case FU_MIRROR: {   // зеркало в полный рост на подставке
+      u32 fr = cA ? cA : RGB(200, 170, 100);
+      drawBox(L(0, 0.95f, -0.2f), v3(0.3f, 0.92f, 0.025f), yawF, fr, true); drawBox(L(0, 0.95f, -0.17f), v3(0.26f, 0.88f, 0.003f), yawF, RGB(185, 210, 225), false);
+      drawBox(L(-0.1f, 1.3f, -0.166f), v3(0.07f, 0.4f, 0.001f), yawF, RGB(225, 240, 248), false);
+      for (int i = -1; i <= 1; i += 2) B(i * 0.25f, 0.03f, -0.1f, 0.03f, 0.03f, 0.16f, fr);
+      B(0, 0.2f, 0.15f, 0.02f, 0.2f, 0.02f, fr);
+    } break;
+    case FU_COUPE: {   // шкаф-купе: три зеркальные двери на направляющих
+      u32 bd = cA ? cA : RGB(80, 80, 88);
+      B(0, 1.05f, -0.15f, 0.48f, 1.05f, 0.3f, bd);
+      for (int k = 0; k < 3; k++) { F(-0.32f + k * 0.32f, 1.05f, 0.157f + (k % 2) * 0.012f, 0.155f, 0.98f, 0.003f, k == 1 ? mixc(bd, RGB(255, 255, 255), 0.12f) : RGB(180, 205, 220)); if (k != 1) F(-0.36f + k * 0.32f, 1.35f, 0.163f, 0.04f, 0.4f, 0.001f, RGB(220, 238, 248)); }
+      B(0, 2.11f, 0.17f, 0.48f, 0.015f, 0.015f, metal); B(0, 0.06f, 0.17f, 0.48f, 0.015f, 0.015f, metal);
+    } break;
+    case FU_KIDS: {   // детский уголок: столик и стульчики, ящик с игрушками, мишка, пирамидка
+      B(0, 0.45f, -0.15f, 0.25f, 0.02f, 0.18f, RGB(250, 250, 250)); for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.22f, 0.22f, -0.15f + j * 0.15f, 0.02f, 0.22f, 0.02f, RGB(120, 200, 240));
+      for (int i = -1; i <= 1; i += 2) { B(i * 0.36f, 0.25f, -0.15f, 0.08f, 0.015f, 0.08f, i < 0 ? RGB(250, 170, 60) : RGB(140, 210, 110)); B(i * 0.36f, 0.12f, -0.15f, 0.015f, 0.12f, 0.015f, RGB(200, 200, 205)); B(i * 0.43f, 0.38f, -0.15f, 0.012f, 0.12f, 0.07f, i < 0 ? RGB(250, 170, 60) : RGB(140, 210, 110)); }
+      B(0.05f, 0.47f, -0.2f, 0.06f, 0.002f, 0.08f, RGB(255, 255, 255)); B(-0.08f, 0.48f, -0.1f, 0.03f, 0.01f, 0.03f, RGB(230, 60, 60));
+      B(-0.25f, 0.15f, 0.3f, 0.18f, 0.15f, 0.13f, RGB(240, 80, 90)); B(-0.3f, 0.33f, 0.3f, 0.04f, 0.04f, 0.04f, RGB(80, 160, 240)); B(-0.18f, 0.34f, 0.28f, 0.05f, 0.03f, 0.03f, RGB(250, 220, 60));
+      B(0.25f, 0.12f, 0.3f, 0.1f, 0.12f, 0.08f, RGB(170, 120, 75)); B(0.25f, 0.32f, 0.3f, 0.08f, 0.08f, 0.07f, RGB(170, 120, 75)); for (int i = -1; i <= 1; i += 2) B(0.25f + i * 0.06f, 0.41f, 0.3f, 0.025f, 0.025f, 0.02f, RGB(150, 100, 60)); F(0.25f, 0.31f, 0.371f, 0.02f, 0.015f, 0.002f, RGB(30, 20, 20));
+      for (int k = 0; k < 4; k++) B(0.0f, 0.03f + k * 0.05f, 0.35f, 0.08f - k * 0.015f, 0.025f, 0.08f - k * 0.015f, k == 0 ? RGB(230, 60, 60) : (k == 1 ? RGB(250, 200, 50) : (k == 2 ? RGB(90, 190, 90) : RGB(80, 140, 230))));
+    } break;
+    case FU_BIKE: {   // велосипед на стенном кронштейне: колёса-кольца, рама, седло, руль
+      u32 fr = cA ? cA : RGB(30, 120, 160);
+      for (int i = -1; i <= 1; i += 2) { for (int k = 0; k < 16; k++) { float a = k * 0.3927f; B(i * 0.3f + cosf(a) * 0.24f, 1.1f + sinf(a) * 0.24f, -0.38f, 0.035f, 0.035f, 0.018f, RGB(25, 25, 28)); } B(i * 0.3f, 1.1f, -0.38f, 0.025f, 0.025f, 0.025f, metal); }
+      { const float P[5][2] = {{-0.3f, 1.1f}, {-0.02f, 1.12f}, {0.22f, 1.36f}, {-0.08f, 1.38f}, {0.3f, 1.1f}}; const int S[6][2] = {{0, 1}, {1, 2}, {2, 3}, {3, 1}, {2, 4}, {3, 0}};
+        for (int q = 0; q < 6; q++) { const float *p0 = P[S[q][0]], *p1 = P[S[q][1]]; for (int k = 0; k <= 8; k++) { float t = k / 8.0f; B(p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t, -0.38f, 0.018f, 0.018f, 0.014f, fr); } } }
+      B(-0.1f, 1.44f, -0.38f, 0.06f, 0.015f, 0.03f, RGB(30, 30, 30)); B(0.24f, 1.44f, -0.38f, 0.015f, 0.015f, 0.1f, RGB(30, 30, 30));
+      B(0, 1.55f, -0.46f, 0.08f, 0.02f, 0.04f, RGB(60, 60, 64)); B(0, 1.48f, -0.43f, 0.01f, 0.06f, 0.01f, RGB(60, 60, 64));
+    } break;
+    case FU_CHESTER: {   // диван честерфилд: стёганая кожа, низкая спинка вровень с подлокотниками-валиками
+      u32 lea = cA ? cA : RGB(95, 45, 30), leaD = mixc(lea, RGB(0, 0, 0), 0.25f);
+      for (int i = -1; i <= 1; i += 2) for (int j = -1; j <= 1; j += 2) B(i * 0.42f, 0.04f, j * 0.25f, 0.03f, 0.04f, 0.03f, RGB(50, 32, 22));
+      B(0, 0.2f, 0.02f, 0.47f, 0.12f, 0.32f, leaD); for (int i = -1; i <= 1; i += 2) B(i * 0.18f, 0.35f, 0.07f, 0.17f, 0.04f, 0.25f, lea);
+      B(0, 0.48f, -0.26f, 0.47f, 0.2f, 0.07f, lea); for (int i = -1; i <= 1; i += 2) B(i * 0.42f, 0.44f, 0.02f, 0.06f, 0.16f, 0.32f, lea);
+      for (int r = 0; r < 2; r++) for (int k = 0; k < 7; k++) F(-0.36f + k * 0.12f + r * 0.06f, 0.42f + r * 0.12f, -0.188f, 0.008f, 0.008f, 0.002f, leaD);   // пуговицы стёжки
+      for (int i = -1; i <= 1; i += 2) F(i * 0.42f, 0.6f, 0.02f, 0.07f, 0.004f, 0.3f, mixc(lea, RGB(255, 255, 255), 0.1f));
+    } break;
+    case FU_CONSOLE: {   // консоль: узкий стол у стены, ваза, зеркало над ним, корзина снизу
+      u32 bd = cA ? cA : RGB(120, 78, 46);
+      B(0, 0.78f, -0.38f, 0.45f, 0.02f, 0.1f, bd); for (int i = -1; i <= 1; i += 2) B(i * 0.42f, 0.39f, -0.38f, 0.02f, 0.39f, 0.08f, bd); B(0, 0.12f, -0.38f, 0.42f, 0.01f, 0.08f, bd);
+      B(-0.2f, 0.9f, -0.38f, 0.05f, 0.1f, 0.05f, RGB(70, 120, 150)); for (int k = 0; k < 3; k++) B(-0.2f + (k - 1) * 0.03f, 1.08f + k * 0.03f, -0.38f, 0.01f, 0.1f, 0.01f, RGB(80, 140, 70));
+      B(0.2f, 0.82f, -0.38f, 0.1f, 0.015f, 0.06f, RGB(230, 220, 200));
+      B(0, 1.45f, -0.47f, 0.3f, 0.3f, 0.02f, cB ? cB : RGB(200, 170, 100)); F(0, 1.45f, -0.448f, 0.26f, 0.26f, 0.002f, RGB(185, 210, 225));
+      B(0.15f, 0.25f, -0.36f, 0.12f, 0.1f, 0.07f, RGB(190, 160, 110));
+    } break;
+    case FU_LADDER: {   // стеллаж-лесенка: прислонён к стене, полки уменьшаются кверху
+      u32 wd2 = cA ? cA : RGB(215, 185, 140);
+      for (int i = -1; i <= 1; i += 2) for (int k = 0; k < 12; k++) { float t = (k + 0.5f) / 12.0f; B(i * 0.32f, t * 1.8f, -0.06f - t * 0.38f, 0.02f, 0.08f, 0.02f, wd2); }
+      for (int k = 0; k < 4; k++) { float y = 0.25f + k * 0.42f, d = 0.16f - k * 0.03f, zc = -0.32f + 0.13f - k * 0.06f; B(0, y, zc, 0.32f, 0.012f, d, wd2);
+        B(-0.15f, y + 0.07f, zc, 0.06f, 0.06f, 0.06f, k % 2 ? RGB(240, 240, 235) : RGB(90, 150, 90)); B(0.12f, y + 0.06f, zc, 0.04f, 0.05f, d * 0.6f, k % 2 ? RGB(200, 90, 70) : RGB(60, 100, 160)); }
     } break;
   }
   #undef L
@@ -1565,16 +2083,21 @@ static void drawFlat() {
     Cell &c = cells[x][z]; int r = cellR[x][z];
     V3 cc = v3(x + 0.5f, 1.3f, z + 0.5f); if (!seen(cc, 1.6f)) continue;
     bool nearC = camDist2(cc) < 4.0f * 4.0f;
-    groundQuad((float)x, (float)z, x + 1.0f, z + 1.0f, 0, c.floor ? newFloorCol(r, x, z) : oldFloorCol(r));
+    groundQuad((float)x, (float)z, x + 1.0f, z + 1.0f, 0, c.floor ? newFloorCol(c.floor, x, z) : oldFloorCol(r));
     if (!nearC) {}
+    else if (!c.floor && flatCond == CO_BARE) { groundQuad(x + 0.3f, z + 0.2f, x + 0.36f, z + 0.26f, 0.002f, RGB(125, 125, 122)); groundQuad(x + 0.7f, z + 0.6f, x + 0.78f, z + 0.66f, 0.002f, RGB(165, 165, 162)); }
+    else if (!c.floor && flatCond == CO_FLOOD && !tiledRoom(r)) { for (int k = 0; k < 3; k++) drawBox(v3(x + 0.5f, 0.012f, z + 0.17f + k * 0.33f), v3(0.5f, 0.012f + ((x + z + k) % 2) * 0.01f, 0.14f), ((x * 3 + k) % 3 - 1) * 0.04f, mixc(oldFloorCol(r), RGB(255, 255, 255), 0.06f * k), true); }   // вздутые доски
+    else if (!c.floor && flatHouse == HO_STALIN && !tiledRoom(r)) { for (int k = 0; k < 4; k++) for (int q = 0; q < 2; q++) groundQuad(x + q * 0.5f + 0.02f, z + k * 0.25f + 0.02f, x + q * 0.5f + 0.48f, z + k * 0.25f + 0.23f, 0.0015f, (k + q) % 2 ? mixc(oldFloorCol(r), RGB(0, 0, 0), 0.12f) : mixc(oldFloorCol(r), RGB(255, 255, 255), 0.06f)); }   // старый паркет ёлочкой
     else if (!c.floor) { groundQuad(x + 0.1f, z + 0.45f, x + 0.6f, z + 0.55f, 0.002f, mixc(oldFloorCol(r), RGB(0, 0, 0), 0.2f));   // трещины старого линолеума
       groundQuad(x + 0.05f, z + 0.05f, x + 0.45f, z + 0.45f, 0.001f, mixc(oldFloorCol(r), RGB(255, 255, 255), 0.08f)); groundQuad(x + 0.55f, z + 0.55f, x + 0.95f, z + 0.95f, 0.001f, mixc(oldFloorCol(r), RGB(255, 255, 255), 0.08f)); }
-    else if (tiledRoom(r)) { for (int k = 1; k < 3; k++) { groundQuad(x + k * 0.333f - 0.004f, (float)z, x + k * 0.333f + 0.004f, z + 1.0f, 0.002f, RGB(175, 180, 188)); groundQuad((float)x, z + k * 0.333f - 0.004f, x + 1.0f, z + k * 0.333f + 0.004f, 0.002f, RGB(175, 180, 188)); } }
+    else if (FLOORS[imax(1, imin(NFLOOR - 1, (int)c.floor))].tile) { for (int k = 1; k < 3; k++) { groundQuad(x + k * 0.333f - 0.004f, (float)z, x + k * 0.333f + 0.004f, z + 1.0f, 0.002f, RGB(175, 180, 188)); groundQuad((float)x, z + k * 0.333f - 0.004f, x + 1.0f, z + k * 0.333f + 0.004f, 0.002f, RGB(175, 180, 188)); } }
     else for (int k = 0; k < 4; k++) { float zz = z + k * 0.25f; groundQuad((float)x, zz - 0.003f, x + 1.0f, zz + 0.003f, 0.002f, RGB(140, 100, 62)); float sx = x + fmodf((k * 0.37f + x * 0.61f + z * 0.29f), 1.0f); groundQuad(sx - 0.003f, zz, sx + 0.003f, zz + 0.25f, 0.002f, RGB(140, 100, 62));
       if ((x + z + k) % 3 == 0) groundQuad((float)x, zz + 0.003f, x + 1.0f, zz + 0.25f - 0.003f, 0.0015f, RGB(184, 140, 92)); }   // доски ламината со сдвигом швов
-    if (c.stain) groundQuad(x + 0.2f, z + 0.25f, x + 0.75f, z + 0.7f, 0.004f, RGB(70, 55, 40));
+    if (c.stain == 2) { groundQuad(x + 0.12f, z + 0.18f, x + 0.82f, z + 0.78f, 0.004f, RGB(28, 24, 22)); groundQuad(x + 0.3f, z + 0.08f, x + 0.6f, z + 0.9f, 0.0045f, RGB(36, 31, 28)); }   // гарь
+    else if (c.stain == 3) { groundQuad(x + 0.1f, z + 0.15f, x + 0.9f, z + 0.85f, 0.03f, RGB(118, 145, 165)); groundQuad(x + 0.25f, z + 0.3f, x + 0.5f, z + 0.45f, 0.031f, RGB(185, 205, 220)); }   // лужа
+    else if (c.stain) groundQuad(x + 0.2f, z + 0.25f, x + 0.75f, z + 0.7f, 0.004f, RGB(70, 55, 40));
     if (c.furn && seen(v3(x + 0.5f, 0.6f, z + 0.5f), 0.9f)) drawFurn(c.furn, x + 0.5f, z + 0.5f, c.frot);
-    if (pitch > -0.6f) groundQuad((float)x, (float)z, x + 1.0f, z + 1.0f, 2.6f, c.floor ? RGB(248, 248, 246) : RGB(215, 210, 196));   // потолок (когда смотришь в пол - не нужен)
+    if (pitch > -0.6f) groundQuad((float)x, (float)z, x + 1.0f, z + 1.0f, 2.6f, c.floor ? RGB(248, 248, 246) : flatCond == CO_FIRE ? RGB(92, 86, 80) : flatCond == CO_BARE ? RGB(182, 182, 178) : flatCond == CO_FLOOD ? RGB(200, 192, 168) : RGB(215, 210, 196));   // потолок (когда смотришь в пол - не нужен)
     if (x % 3 == 1 && z % 3 == 1) {                                                             // лампа: старая лампочка на проводе или новый светильник
       if (!c.floor) { drawBox(v3(x + 0.5f, 2.45f, z + 0.5f), v3(0.006f, 0.15f, 0.006f), 0, RGB(30, 30, 30), false); drawBox(v3(x + 0.5f, 2.27f, z + 0.5f), v3(0.035f, 0.045f, 0.035f), 0, RGB(255, 235, 170), false); }
       else { drawBox(v3(x + 0.5f, 2.57f, z + 0.5f), v3(0.22f, 0.025f, 0.22f), 0.4f, RGB(250, 250, 250), true); drawBox(v3(x + 0.5f, 2.545f, z + 0.5f), v3(0.17f, 0.002f, 0.17f), 0.4f, RGB(255, 250, 225), false); }
@@ -1587,7 +2110,7 @@ static void drawFlat() {
       for (int k = 0; k < 2; k++) drawBox(v3((float)x, 1.05f, z + 0.05f + k * 0.9f), v3(0.06f, 1.05f, 0.05f), 0, RGB(240, 240, 240), true); drawBox(v3((float)x, 2.35f, z + 0.5f), v3(0.08f, 0.25f, 0.5f), 0, RGB(210, 208, 200), true);
       (void)lf; if (seen(v3((float)x, 1.2f, z + 0.5f), 1.5f)) doorLeaf(v3((float)x, 0, z + 0.06f), 0.0f, angX[x][z], ent); continue; }
     for (int s = 0; s < 2; s++) { int cx = s == 0 ? x - 1 : x; V3 c = v3(x + (s == 0 ? -0.04f : 0.04f), 1.3f, z + 0.5f);
-      if (inRoom(cx, z)) wallSide(c, true, fX[x][z][s], s == 0 ? -1.0f : 1.0f, cellR[cx][z], x * 7 + z * 3 + s); else drawBox(c, v3(0.04f, 1.3f, 0.5f), 0, RGB(150, 120, 100), true); }
+      if (inRoom(cx, z)) wallSide(c, true, fX[x][z][s], s == 0 ? -1.0f : 1.0f, cellR[cx][z], x * 7 + z * 3 + s); else drawBox(c, v3(0.04f, 1.3f, 0.5f), 0, outerWallCol(), true); }
   }
   for (int x = 0; x < MW; x++) for (int z = 0; z <= MH; z++) {
     if (!wallZ[x][z]) continue;
@@ -1595,7 +2118,7 @@ static void drawFlat() {
       for (int k = 0; k < 2; k++) drawBox(v3(x + 0.05f + k * 0.9f, 1.05f, (float)z), v3(0.05f, 1.05f, 0.06f), 0, RGB(240, 240, 240), true); drawBox(v3(x + 0.5f, 2.35f, (float)z), v3(0.5f, 0.25f, 0.08f), 0, RGB(210, 208, 200), true);
       (void)lf; if (seen(v3(x + 0.5f, 1.2f, (float)z), 1.5f)) doorLeaf(v3(x + 0.06f, 0, (float)z), 1.5708f, -angZ[x][z], ent); continue; }
     for (int s = 0; s < 2; s++) { int cz = s == 0 ? z - 1 : z; V3 c = v3(x + 0.5f, 1.3f, z + (s == 0 ? -0.04f : 0.04f));
-      if (inRoom(x, cz)) wallSide(c, false, fZ[x][z][s], s == 0 ? -1.0f : 1.0f, cellR[x][cz], x * 5 + z * 11 + s); else drawBox(c, v3(0.5f, 1.3f, 0.04f), 0, RGB(150, 120, 100), true); }
+      if (inRoom(x, cz)) wallSide(c, false, fZ[x][z][s], s == 0 ? -1.0f : 1.0f, cellR[x][cz], x * 5 + z * 11 + s); else drawBox(c, v3(0.5f, 1.3f, 0.04f), 0, outerWallCol(), true); }
   }
   // контейнер для мусора у входа
   drawBox(v3(binX, 0.4f, binZ), v3(0.35f, 0.4f, 0.3f), 0, RGB(40, 110, 60), true); drawBox(v3(binX, 0.82f, binZ), v3(0.37f, 0.03f, 0.32f), 0, RGB(30, 80, 45), true);
@@ -1604,6 +2127,11 @@ static void drawFlat() {
     if (t.kind == 0) { drawBox(c + v3(0, 0.15f, 0), v3(0.17f, 0.15f, 0.15f), t.x, RGB(25, 25, 28), true); drawBox(c + v3(0, 0.33f, 0), v3(0.04f, 0.04f, 0.04f), t.x, RGB(25, 25, 28), true); }
     else if (t.kind == 1) drawBox(c + v3(0, 0.14f, 0), v3(0.2f, 0.14f, 0.16f), t.z, RGB(170, 130, 80), true);
     else if (t.kind == 2) for (int k = 0; k < 3; k++) drawBox(c + v3(k * 0.08f - 0.08f, 0.1f, (k % 2) * 0.06f), v3(0.03f, 0.1f, 0.03f), 0, RGB(60, 120, 60), true);
+    else if (t.kind == 4) { drawBox(c + v3(0, 0.07f, 0), v3(0.22f, 0.07f, 0.14f), t.x, RGB(205, 195, 170), true); drawBox(c + v3(0, 0.141f, 0), v3(0.12f, 0.002f, 0.08f), t.x, RGB(60, 90, 160), false);   // мешок цемента
+      drawBox(c + v3(0.3f, 0.03f, 0.1f), v3(0.06f, 0.03f, 0.06f), t.z, RGB(175, 175, 170), true); }                                                                                                    // обломок
+    else if (t.kind == 5) for (int k = 0; k < 3; k++) drawBox(c + v3(0, 0.025f + k * 0.045f, 0), v3(0.32f, 0.022f, 0.05f), t.x * 2 + k * 0.7f, k == 1 ? RGB(55, 40, 30) : RGB(30, 24, 20), true);   // обгоревшие доски
+    else if (t.kind == 6) { groundQuad(t.x - 0.25f, t.z - 0.22f, t.x + 0.25f, t.z + 0.22f, 0.006f, RGB(110, 125, 135)); drawBox(c + v3(0, 0.1f, 0), v3(0.2f, 0.1f, 0.17f), t.z + 0.3f, RGB(135, 112, 82), true);
+      drawBox(c + v3(0.02f, 0.2f, 0), v3(0.2f, 0.01f, 0.15f), t.z + 0.4f, RGB(120, 98, 70), true); }                                                                                                  // размокшая коробка
     else { drawBox(c + v3(0, 0.12f, 0), v3(0.22f, 0.12f, 0.22f), t.x + t.z, RGB(40, 40, 42), true); drawBox(c + v3(0, 0.12f, 0), v3(0.1f, 0.13f, 0.1f), t.x + t.z, RGB(110, 120, 100), true); } }
   // призрак мебели при выборе места
   if (tool == T_FURN && aim.type == H_FLOOR && !cells[aim.x][aim.z].furn) drawFurn(furnSel, aim.x + 0.5f, aim.z + 0.5f, ((int)roundf(yaw / 1.5708f) % 4 + 6) % 4);
@@ -1688,15 +2216,15 @@ static void drawHands() {                         // руки в рабочих 
       if (working) for (int i = 0; i < 2; i++) drawBox(axle + U * (-0.03f - 0.02f * fabsf(sinf(t * 0.7f + i))) + R * (0.02f * (i ? 1 : -1)), v3(0.003f, 0.006f, 0.003f), yw, pc, false);   // капли
     } break;
     case T_FLOOR: {
-      bool tile = tiledRoom(cellR[imax(0, imin(MW - 1, cellOf(px)))][imax(0, imin(MH - 1, cellOf(pz)))]);
+      bool tile = FLOORS[floorSel].tile; u32 fc = FLOORS[floorSel].a, fd = mixc(fc, RGB(0, 0, 0), 0.15f);
       if (tile) {                                  // плитка в левой руке, резиновая киянка в правой
-        drawBox(lh + F * 0.03f + U * 0.02f, v3(0.045f, 0.004f, 0.045f), yw, RGB(225, 228, 234), true);
+        drawBox(lh + F * 0.03f + U * 0.02f, v3(0.045f, 0.004f, 0.045f), yw, fc, true);
         drawBox(lh + F * 0.03f + U * 0.025f, v3(0.044f, 0.001f, 0.001f), yw, RGB(170, 175, 185), false); drawBox(lh + F * 0.03f + U * 0.025f, v3(0.001f, 0.001f, 0.044f), yw, RGB(170, 175, 185), false);
         V3 hd = rh + F * 0.1f + U * (0.06f - 0.05f * fabsf(sw)); rod(rh, hd, 0.006f, yw, RGB(180, 140, 90));
         drawBox(hd, v3(0.03f, 0.018f, 0.018f), yw, RGB(30, 30, 34), true);
       } else {                                     // доска ламината
-        drawBox(lh + F * 0.06f + R * 0.06f + U * 0.02f, v3(0.1f, 0.006f, 0.03f), yw, RGB(185, 140, 92), true);
-        for (int i = 0; i < 3; i++) drawBox(lh + F * 0.06f + R * (0.0f + 0.05f * i) + U * 0.027f, v3(0.012f, 0.0005f, 0.028f), yw, RGB(160, 118, 76), false);
+        drawBox(lh + F * 0.06f + R * 0.06f + U * 0.02f, v3(0.1f, 0.006f, 0.03f), yw, fc, true);
+        for (int i = 0; i < 3; i++) drawBox(lh + F * 0.06f + R * (0.0f + 0.05f * i) + U * 0.027f, v3(0.012f, 0.0005f, 0.028f), yw, fd, false);
         V3 hd = rh + F * 0.1f + U * (0.06f - 0.05f * fabsf(sw)); rod(rh, hd, 0.006f, yw, RGB(180, 140, 90)); drawBox(hd, v3(0.03f, 0.018f, 0.018f), yw, RGB(200, 60, 40), true);
       }
     } break;
@@ -1711,56 +2239,95 @@ static void drawHands() {                         // руки в рабочих 
 }
 
 // ---------- рынок, сохранение ----------
-struct Offer { int layout, price; unsigned seed; };
+struct Offer { int layout, price; unsigned seed; int cond, house, dist; };
+struct OfferV5 { int layout, price; unsigned seed; };
 static Offer offers[3];
-static unsigned flatSeed = 0;
 enum { GS_TITLE, GS_MARKET, GS_FLAT, GS_SOLD };
 static int gs = GS_TITLE; static bool hasSave = false;
-static int soldPrice = 0, soldProfit = 0;
+static int soldPrice = 0, soldProfit = 0, soldBuyer = -1;
+static int layoutCells(int id) { int n = 0; for (int z = 0; z < MH; z++) for (int x = 0; x < MW; x++) if (LAYOUTS[id].rows[z][x] != ' ') n++; return n; }
+static int layoutRooms(int id) {                 // сколько жилых комнат (отдельных областей «L»)
+  bool v[MW][MH]; memset(v, 0, sizeof v); int n = 0;
+  for (int z0 = 0; z0 < MH; z0++) for (int x0 = 0; x0 < MW; x0++) if (LAYOUTS[id].rows[z0][x0] == 'L' && !v[x0][z0]) { n++; int sx[MW * MH], sz[MW * MH], sp = 0; sx[sp] = x0; sz[sp++] = z0; v[x0][z0] = true;
+    while (sp) { sp--; int x = sx[sp], z = sz[sp]; int d[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}; for (int k = 0; k < 4; k++) { int nx = x + d[k][0], nz = z + d[k][1];
+      if (nx >= 0 && nz >= 0 && nx < MW && nz < MH && !v[nx][nz] && LAYOUTS[id].rows[nz][nx] == 'L') { v[nx][nz] = true; sx[sp] = nx; sz[sp++] = nz; } } } }
+  return n;
+}
+static int layoutPrice(int id) { long long a = layoutCells(id); return (int)(a * (36000 + a * 100)); }   // цена за клетку растёт вместе с площадью
 static void genOffers() {
-  for (int i = 0; i < 3; i++) { Offer &o = offers[i]; int maxL = imin(NLAYOUT - 1, flats / 2); o.layout = i == 0 ? 0 : imin(maxL, rand() % (maxL + 1)); if (i == 2) o.layout = maxL;
-    o.price = LAYOUTS[o.layout].price * (90 + rand() % 21) / 100 / 1000 * 1000; o.seed = (unsigned)rand() * 7u + 11u; }
+  // три РАЗНЫЕ по площади планировки; с каждой проданной квартирой открываются всё большие
+  int bySize[NLAYOUT]; for (int i = 0; i < NLAYOUT; i++) bySize[i] = i;
+  for (int a = 0; a < NLAYOUT; a++) for (int b = a + 1; b < NLAYOUT; b++) if (layoutCells(bySize[b]) < layoutCells(bySize[a])) { int t = bySize[a]; bySize[a] = bySize[b]; bySize[b] = t; }
+  int maxL = imin(NLAYOUT - 1, 4 + flats);
+  int pick[3]; pick[0] = rand() % (imin(flats < 3 ? 2 : maxL, maxL) + 1);       // в начале одна всегда маленькая и по карману
+  for (int i = 1; i < 3; i++) { for (;;) { int c = rand() % (maxL + 1); bool dup = false; for (int k = 0; k < i; k++) if (pick[k] == c) dup = true; if (!dup) { pick[i] = c; break; } } }
+  for (int a = 0; a < 3; a++) for (int b = a + 1; b < 3; b++) if (pick[b] < pick[a]) { int t = pick[a]; pick[a] = pick[b]; pick[b] = t; }
+  for (int i = 0; i < 3; i++) pick[i] = bySize[pick[i]];
+  for (int i = 0; i < 3; i++) { Offer &o = offers[i]; o.layout = pick[i];
+    int hr = rand() % 100; o.house = hr < 28 ? HO_KHRU : hr < 62 ? HO_PANEL : hr < 82 ? HO_STALIN : HO_NEW;
+    int dr = rand() % 100; o.dist = dr < 25 ? DI_CENTER : dr < 72 ? DI_SLEEP : DI_EDGE;
+    if (o.house == HO_STALIN && o.dist == DI_EDGE) o.dist = DI_SLEEP;            // сталинки - ближе к центру
+    int cr = rand() % 100;
+    if (o.house == HO_NEW) o.cond = cr < 65 ? CO_BARE : cr < 85 ? CO_FLOOD : CO_NORMAL;   // в новостройках - голый бетон или залили соседи
+    else o.cond = cr < 34 ? CO_NORMAL : cr < 52 ? CO_FIRE : cr < 70 ? CO_FLOOD : CO_GRANNY;
+    int area = layoutCells(o.layout);                                              // в хрущёвках - маленькие, в сталинках - просторные
+    if (o.house == HO_KHRU && area > 75) o.house = HO_PANEL;
+    if (o.house == HO_STALIN && area < 50) o.house = HO_KHRU;
+    if (o.layout == 1 || o.layout == 9) o.house = HO_KHRU;                          // название говорит само за себя
+    if (o.layout == 12) { o.house = HO_STALIN; if (o.dist == DI_EDGE) o.dist = DI_SLEEP; }
+    if (o.house != HO_NEW && o.cond == CO_BARE) o.cond = CO_NORMAL;
+    if (flats == 0 && i == 0) { o.house = HO_PANEL; o.dist = DI_SLEEP; o.cond = CO_NORMAL; }   // первая квартира - попроще и по карману
+    o.price = (int)((long long)layoutPrice(o.layout) * (92 + rand() % 17) / 100 * HOUSEK[o.house] * DISTK[o.dist] * CONDK[o.cond] / 1000 * 1000); o.seed = (unsigned)rand() * 7u + 11u; }
 }
 static void saveGame() {
   FILE *f = fopen(pth("remont.sav"), "wb"); if (!f) return;
-  int head[12] = {4, money, flats, owned, layoutId, flatBuy, spent, carried, (int)flatSeed, (int)trash.size(), entX, entZ};
-  fwrite(head, sizeof head, 1, f); fwrite(&px, sizeof px, 1, f); fwrite(&pz, sizeof pz, 1, f); fwrite(&yaw, sizeof yaw, 1, f);
+  int head[12] = {6, money, flats, owned, layoutId, flatBuy, spent, carried, (int)flatSeed, (int)trash.size(), entX, entZ};
+  int head2[4] = {flatCond, flatHouse, flatDist, oldInit};
+  fwrite(head, sizeof head, 1, f); fwrite(head2, sizeof head2, 1, f); fwrite(&px, sizeof px, 1, f); fwrite(&pz, sizeof pz, 1, f); fwrite(&yaw, sizeof yaw, 1, f);
   fwrite(cells, sizeof cells, 1, f); fwrite(fX, sizeof fX, 1, f); fwrite(fZ, sizeof fZ, 1, f);
   if (!trash.empty()) fwrite(&trash[0], sizeof(Trash), trash.size(), f);
   fwrite(offers, sizeof offers, 1, f); fclose(f);
 }
 static bool loadGame() {
   FILE *f = fopen(pth("remont.sav"), "rb"); if (!f) return false;
-  int head[12]; bool ok = fread(head, sizeof head, 1, f) == 1 && head[0] >= 2 && head[0] <= 4;
+  int head[12]; bool ok = fread(head, sizeof head, 1, f) == 1 && head[0] >= 2 && head[0] <= 6;
   if (!ok) { fclose(f); return false; }
   money = head[1]; flats = head[2];
-  if (head[0] < 4) {                                   // сохранение со старыми (маленькими) квартирами: возвращаем деньги за недоделанную
+  if (head[0] < 5) {                                   // сохранение со старыми (маленькими) квартирами: возвращаем деньги за недоделанную
     owned = false; carried = 0; spent = 0;
     if (head[3]) money += head[5] + head[6];
     fclose(f); return true;
   }
+  int head2[4] = {CO_NORMAL, HO_PANEL, DI_SLEEP, 0};                 // в 5-й версии этого не было: обычная панелька
+  if (head[0] >= 6 && fread(head2, sizeof head2, 1, f) != 1) { fclose(f); return false; }
+  flatCond = clampi(head2[0], 0, NCOND - 1); flatHouse = clampi(head2[1], 0, NHOUSE - 1); flatDist = clampi(head2[2], 0, NDIST - 1);
   owned = head[3]; layoutId = clampi(head[4], 0, NLAYOUT - 1); flatBuy = head[5]; flatSeed = (unsigned)head[8];
   if (owned) buildFlat(layoutId, flatSeed);
+  oldInit = head2[3]; genBuyers();
   spent = head[6]; carried = head[7]; int nt = head[9];
   if (nt < 0 || nt > MW * MH) { fclose(f); owned = false; return false; }
   ok = fread(&px, sizeof px, 1, f) == 1 && fread(&pz, sizeof pz, 1, f) == 1 && fread(&yaw, sizeof yaw, 1, f) == 1;
   ok = ok && fread(cells, sizeof cells, 1, f) == 1 && fread(fX, sizeof fX, 1, f) == 1 && fread(fZ, sizeof fZ, 1, f) == 1;
   trash.resize(nt); if (nt) ok = ok && fread(&trash[0], sizeof(Trash), nt, f) == (size_t)nt;
-  ok = ok && fread(offers, sizeof offers, 1, f) == 1;
-  for (int i = 0; i < 3; i++) offers[i].layout = clampi(offers[i].layout, 0, NLAYOUT - 1);
+  if (head[0] >= 6) ok = ok && fread(offers, sizeof offers, 1, f) == 1;
+  else { OfferV5 o5[3]; ok = ok && fread(o5, sizeof o5, 1, f) == 1; for (int i = 0; i < 3; i++) { offers[i].layout = o5[i].layout; offers[i].price = o5[i].price; offers[i].seed = o5[i].seed; offers[i].cond = CO_NORMAL; offers[i].house = HO_PANEL; offers[i].dist = DI_SLEEP; } }
+  for (int i = 0; i < 3; i++) { offers[i].layout = clampi(offers[i].layout, 0, NLAYOUT - 1); offers[i].cond = clampi(offers[i].cond, 0, NCOND - 1); offers[i].house = clampi(offers[i].house, 0, NHOUSE - 1); offers[i].dist = clampi(offers[i].dist, 0, NDIST - 1); }
   fclose(f); return ok;
 }
 static void buyFlat(int i) {
   Offer o = offers[i]; if (money < o.price) { say("НЕ ХВАТАЕТ ДЕНЕГ"); return; }
-  money -= o.price; flatBuy = o.price; flatSeed = o.seed; buildFlat(o.layout, o.seed); owned = true; memset(angX, 0, sizeof angX); memset(angZ, 0, sizeof angZ);
+  money -= o.price; flatBuy = o.price; flatSeed = o.seed; flatCond = o.cond; flatHouse = o.house; flatDist = o.dist; buildFlat(o.layout, o.seed); genBuyers(); owned = true; memset(angX, 0, sizeof angX); memset(angZ, 0, sizeof angZ);
   px = entX + 0.5f; pz = entZ + 0.5f; yaw = 0; pitch = -0.15f; tool = T_HAND;
   for (int k = 0; k < 4; k++) { float a = k * 1.5708f; if (canStand(px + sinf(a) * 0.6f, pz + cosf(a) * 0.6f)) { yaw = a; break; } }
-  gs = GS_FLAT; say("КВАРТИРА ТВОЯ! УБЕРИ МУСОР, СДЕРИ ОБОИ, ПОКРАСЬ, ПОЛОЖИ ПОЛ, РАССТАВЬ МЕБЕЛЬ"); saveGame();
+  static const char *HINT[NCOND] = {"КВАРТИРА ТВОЯ! УБЕРИ МУСОР, СДЕРИ ОБОИ, ПОКРАСЬ, ПОЛОЖИ ПОЛ, РАССТАВЬ МЕБЕЛЬ",
+    "ПОСЛЕ ПОЖАРА: ОТМОЙ ГАРЬ, СДЕРИ ОБГОРЕВШИЕ ОБОИ, ЗАМЕНИ ПОЛ", "ПОСЛЕ ПОТОПА: СОБЕРИ ЛУЖИ, СДЕРИ ПЛЕСЕНЬ, ЗАМЕНИ ВЗДУТЫЙ ПОЛ",
+    "БАБУШКИНА КВАРТИРА: ВЫНЕСИ СТАРУЮ МЕБЕЛЬ РУКАМИ", "БЕЗ ОТДЕЛКИ: ВЫНЕСИ СТРОЙМУСОР, ЗАШПАКЛЮЙ БЕТОН, ПОЛОЖИ ПОЛ"};
+  gs = GS_FLAT; say(HINT[flatCond]); saveGame();
 }
-static void sellFlat() {
-  soldPrice = salePrice(); soldProfit = soldPrice - flatBuy - spent; money += soldPrice; flats++; owned = false; carried = 0;
+static void sellFlat(int buyer) {
+  soldBuyer = buyer; soldPrice = buyerPrice(buyer); soldProfit = soldPrice - flatBuy - spent; money += soldPrice; flats++; owned = false; carried = 0;
   genOffers();
-  { int need = offers[0].price + 450000; if (money < need) { money = need; say("РОДНЯ ПОМОГЛА ДЕНЬГАМИ НА НОВУЮ КВАРТИРУ"); } }
+  { int need = imin(offers[0].price, imin(offers[1].price, offers[2].price)) + 450000; if (money < need) { money = need; say("РОДНЯ ПОМОГЛА ДЕНЬГАМИ НА НОВУЮ КВАРТИРУ"); } }
   gs = GS_SOLD; saveGame();
 }
 static void fmtR(char *b, int n, int v) { char t[32]; snprintf(t, sizeof t, "%d", v < 0 ? -v : v); int L = (int)strlen(t), k = 0; char o[48]; if (v < 0) o[k++] = '-'; for (int i = 0; i < L; i++) { o[k++] = t[i]; if ((L - i - 1) % 3 == 0 && i < L - 1) o[k++] = ' '; } o[k] = 0; snprintf(b, n, "%s Р", o); }
@@ -1803,7 +2370,7 @@ static void updateJoy() {
 }
 
 // ---------- кадр в квартире ----------
-static bool showTasks = false, showPick = false;
+static bool showTasks = false, showPick = false, showBuyers = false; static int furnTab = 0, furnPage = 0;
 static std::vector<SDL_Rect> uiRects;
 static bool overUI(int x, int y) { for (size_t i = 0; i < uiRects.size(); i++) { const SDL_Rect &r = uiRects[i]; if (x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h) return true; } return false; }
 static bool ub(int x, int y, int w, int h, const char *l, bool en, u32 c) { SDL_Rect r = {x, y, w, h}; uiRects.push_back(r); return button(x, y, w, h, l, en, c); }
@@ -1813,14 +2380,14 @@ static void frameFlat(float dt) {
   updateJoy();
   // ходьба и обзор
   float sp = 2.0f * dt, fx = sinf(yaw), fz = cosf(yaw);
-  if (!showTasks && !showPick) tryMove((fx * -joyY + fz * joyX) * sp, (fz * -joyY - fx * joyX) * sp);
+  if (!showTasks && !showPick && !showBuyers) tryMove((fx * -joyY + fz * joyX) * sp, (fz * -joyY - fx * joyX) * sp);
   yaw += lookDX * 0.006f; pitch = clampf(pitch - lookDY * 0.005f, -1.25f, 1.0f); lookDX = lookDY = 0;
   // мусор сам выбрасывается у входной двери
   if (carried > 0 && (px - (entX + 0.5f)) * (px - (entX + 0.5f)) + (pz - (entZ + 0.5f)) * (pz - (entZ + 0.5f)) < 1.0f) { char b[64]; snprintf(b, sizeof b, "МУСОР ВЫНЕСЕН (%d)", carried); carried = 0; say(b); }
   aim = castAim();
   // работа: держишь «ДЕЛАТЬ» - прогресс
   float need; bool ok; char why[96]; const char *lbl = actionInfo(need, ok, why);
-  working = actHeld && ok && !showTasks && !showPick;
+  working = actHeld && ok && !showTasks && !showPick && !showBuyers;
   if (working) { workT += dt; workBob += dt * 18; if (workT >= need) { doAction(); workT = 0; actHeld = tool == T_MOP || tool == T_SCRAPER || tool == T_ROLLER || tool == T_FLOOR ? actHeld : false; saveGame(); } }
   else workT = 0;
   // 3D
@@ -1835,37 +2402,54 @@ static void frameFlat(float dt) {
   else if (!ok && why[0] && aim.type != H_NONE) drawTextSh(IW / 2, IH / 2 + fs * 8, why, fs, RGB(255, 210, 160), 1);
   // верх: деньги, название, прогресс
   Prog pr = progress();
-  fillRectA(0, 0, IW, fs * 13, RGB(14, 16, 22), 200);
+  fillRectA(0, 0, IW, fs * 20, RGB(14, 16, 22), 200);
   fmtR(m, sizeof m, money); drawTextSh(fs * 3, fs * 3, m, fs + 1, RGB(150, 240, 150), 0);
-  snprintf(b, sizeof b, "%s  РЕМОНТ %d%%", LAYOUTS[layoutId].name, (int)(pr.k * 100)); drawTextSh(fs * 3 + textW("00 000 000 Р", fs + 1) + fs * 8, fs * 3, b, fs, RGB(255, 230, 160), 0);
-  if (ub(IW - fs * 92, fs, fs * 44, fs * 11, "ЗАДАЧИ", true, RGB(70, 90, 130))) showTasks = !showTasks;
-  if (ub(IW - fs * 46, fs, fs * 44, fs * 11, "ПРОДАТЬ", true, RGB(60, 140, 70))) { showTasks = true; }
+  snprintf(b, sizeof b, "%s  РЕМОНТ %d%%", LAYOUTS[layoutId].name, (int)(pr.k * 100)); drawTextSh(fs * 3 + textW("00 000 000 Р", fs + 1) + fs * 8, fs * 1 + 1, b, fs, RGB(255, 230, 160), 0);
+  { snprintf(b, sizeof b, "%s, %s, %s", HOUSEN[flatHouse], DISTN[flatDist], CONDN[flatCond]); drawTextSh(fs * 3 + textW("00 000 000 Р", fs + 1) + fs * 8, fs * 11, b, fs, CONDC[flatCond], 0); }
+  if (ub(IW - fs * 92, fs, fs * 44, fs * 11, "ЗАДАЧИ", true, RGB(70, 90, 130))) { showTasks = !showTasks; showBuyers = false; }
+  if (ub(IW - fs * 46, fs, fs * 44, fs * 11, "ПРОДАТЬ", true, RGB(60, 140, 70))) { showBuyers = !showBuyers; showTasks = false; }
   // инструменты
   int tbw = imin(fs * 34, (IW - JR() * 4 - fs * 24) / NTOOL), tbx = IW / 2 - tbw * NTOOL / 2, tby = IH - fs * 16;
-  for (int i = 0; i < NTOOL; i++) { char tl[48]; if (i == T_ROLLER) snprintf(tl, sizeof tl, "ВАЛИК\n%s", PAINTN[paintSel]); else if (i == T_FURN) snprintf(tl, sizeof tl, "МЕБЕЛЬ\n%s", FURN[furnSel].name); else if (i == T_PAPER) snprintf(tl, sizeof tl, "ОБОИ\n%s", PAPERS[paperSel].name); else snprintf(tl, sizeof tl, "%s", TOOLN[i]);
-    bool pick = i == T_ROLLER || i == T_FURN || i == T_PAPER;
+  for (int i = 0; i < NTOOL; i++) { char tl[48]; if (i == T_ROLLER) snprintf(tl, sizeof tl, "ВАЛИК\n%s", PAINTN[paintSel]); else if (i == T_FURN) snprintf(tl, sizeof tl, "МЕБЕЛЬ\n%s", FURN[furnSel].name); else if (i == T_PAPER) snprintf(tl, sizeof tl, "ОБОИ\n%s", PAPERS[paperSel].name); else if (i == T_FLOOR) snprintf(tl, sizeof tl, "ПОЛ\n%s", FLOORS[floorSel].name); else snprintf(tl, sizeof tl, "%s", TOOLN[i]);
+    bool pick = i == T_ROLLER || i == T_FURN || i == T_PAPER || i == T_FLOOR;
     if (ub(tbx + i * tbw, tby, tbw - fs, fs * 15, tl, true, tool == i ? RGB(200, 140, 50) : RGB(60, 66, 80))) { if (tool == i && pick) showPick = true; else { tool = i; showPick = pick; } } }
   // джойстик и кнопка «делать»
   fillCircle(joyCX(), joyCY(), JR(), RGB(255, 255, 255), 40); fillCircle(joyCX() + (int)(joyX * JR() * 0.6f), joyCY() + (int)(joyY * JR() * 0.6f), JR() / 2, RGB(255, 255, 255), 90);
   int ax, ay, aw, ah; actRect(ax, ay, aw, ah); fillCircle(ax + aw / 2, ay + ah / 2, aw / 2, ok ? RGB(90, 200, 110) : RGB(120, 120, 130), actHeld ? 200 : 140);
   { int sc = fs; while (sc > 1 && textW(lbl, sc) > aw - fs * 4) sc--; drawText(ax + aw / 2, ay + ah / 2 - sc * 3, lbl, sc, RGB(255, 255, 255), 1); }
-  if (carried) { snprintf(b, sizeof b, "МУСОР В РУКАХ: %d/4 (НЕСИ К ВХОДУ)", carried); drawTextSh(fs * 3, fs * 15, b, fs, RGB(255, 220, 120), 0); }
+  if (carried) { snprintf(b, sizeof b, "МУСОР В РУКАХ: %d/4 (НЕСИ К ВХОДУ)", carried); drawTextSh(fs * 3, fs * 22, b, fs, RGB(255, 220, 120), 0); }
   // выбор краски или мебели
   if (showPick) {
-    int pw = imin(IW - fs * 10, fs * 240), ph = IH * 2 / 3, x0 = IW / 2 - pw / 2, y0 = IH / 6; fillRectA(x0 - fs * 2, y0 - fs * 2, pw + fs * 4, ph + fs * 4, RGB(14, 18, 26), 230);
+    int pw = imin(IW - fs * 10, tool == T_FURN ? fs * 330 : fs * 260), ph = IH * 2 / 3 + fs * 8, x0 = IW / 2 - pw / 2, y0 = IH / 6 - fs * 2; fillRectA(x0 - fs * 2, y0 - fs * 2, pw + fs * 4, ph + fs * 4, RGB(14, 18, 26), 230);
     if (tool == T_ROLLER) { drawText(IW / 2, y0 + fs * 2, "ЦВЕТ КРАСКИ (600 Р ЗА КУСОК СТЕНЫ)", fs, RGB(255, 230, 160), 1);
-      int cw = (pw - fs * 3) / 4, chh = (ph - fs * 30) / 2;
-      for (int i = 1; i < NPAINT; i++) { int cx = x0 + ((i - 1) % 4) * (cw + fs), cy = y0 + fs * 12 + ((i - 1) / 4) * (chh + fs); fillRect(cx, cy, cw, chh - fs * 10, PAINT[i]);
+      int cw = (pw - fs * 3) / 4, chh = (ph - fs * 30) / ((NPAINT + 2) / 4);
+      for (int i = 1; i < NPAINT; i++) { int cx = x0 + ((i - 1) % 4) * (cw + fs), cy = y0 + fs * 12 + ((i - 1) / 4) * (chh + fs); fillRect(cx, cy, cw, chh - fs * 10, PAINT[i]); fillRect(cx, cy, fs * 3, fs * 3, STYLEC[PAINTS[i]]);
         if (ub(cx, cy + chh - fs * 10, cw, fs * 9, PAINTN[i], true, paintSel == i ? RGB(200, 140, 50) : RGB(60, 66, 80))) { paintSel = i; showPick = false; } } }
+    else if (tool == T_FLOOR) { drawText(IW / 2, y0 + fs * 2, "ПОКРЫТИЕ ПОЛА (ЦЕНА ЗА КЛЕТКУ)", fs, RGB(255, 230, 160), 1);
+      int cw = (pw - fs * 3) / 4, chh = (ph - fs * 30) / ((NFLOOR + 2) / 4);
+      for (int i = 1; i < NFLOOR; i++) { int cx = x0 + ((i - 1) % 4) * (cw + fs), cy = y0 + fs * 12 + ((i - 1) / 4) * (chh + fs), sh = imax(fs * 4, chh - fs * 18);
+        fillRect(cx, cy, cw, sh, FLOORS[i].a);                                    // образец
+        if (FLOORS[i].tile) { fillRect(cx + cw / 2, cy, cw / 2, sh / 2, FLOORS[i].b); fillRect(cx, cy + sh / 2, cw / 2, sh / 2, FLOORS[i].b); }
+        else for (int k = 1; k < 4; k++) fillRect(cx, cy + k * sh / 4, cw, 1 + fs / 3, FLOORS[i].b);
+        fillRect(cx, cy, fs * 3, fs * 3, STYLEC[FLOORS[i].style]);
+        fmtR(m, sizeof m, FLOORS[i].cost); snprintf(b, sizeof b, "%s\n%s", FLOORS[i].name, m);
+        if (ub(cx, cy + sh, cw, imin(fs * 17, chh - sh), b, true, floorSel == i ? RGB(200, 140, 50) : RGB(60, 66, 80))) { floorSel = i; showPick = false; } } }
     else if (tool == T_PAPER) { drawText(IW / 2, y0 + fs * 2, "ОБОИ (900 Р ЗА ПОЛОСУ СТЕНЫ)", fs, RGB(255, 230, 160), 1);
-      int cw = (pw - fs * 3) / 4, chh = (ph - fs * 30) / 2;
+      int cw = (pw - fs * 3) / 4, chh = (ph - fs * 30) / ((NPAPER + 2) / 4);
       for (int i = 1; i < NPAPER; i++) { int cx = x0 + ((i - 1) % 4) * (cw + fs), cy = y0 + fs * 12 + ((i - 1) / 4) * (chh + fs), sh = chh - fs * 10;
         fillRect(cx, cy, cw, sh, PAPERS[i].a);                                   // образец узора
         for (int k = 0; k < 4; k++) { if (PAPERS[i].kind == 0) fillRect(cx + k * cw / 4, cy, cw / 9, sh, PAPERS[i].b); else if (PAPERS[i].kind == 3) fillRect(cx, cy + k * sh / 4, cw, fs, PAPERS[i].b); else if (PAPERS[i].kind == 4) fillRect(cx + k * cw / 4, cy, fs / 2 + 1, sh, PAPERS[i].b); else for (int q = 0; q < 3; q++) fillRect(cx + cw / 8 + q * cw / 3 + (k % 2) * cw / 6, cy + sh / 8 + k * sh / 4, fs * 3, fs * 3, PAPERS[i].b); }
+        fillRect(cx, cy, fs * 3, fs * 3, STYLEC[PAPERS[i].style]);
         if (ub(cx, cy + chh - fs * 10, cw, fs * 9, PAPERS[i].name, true, paperSel == i ? RGB(200, 140, 50) : RGB(60, 66, 80))) { paperSel = i; showPick = false; } } }
     else { drawText(IW / 2, y0 + fs * 2, "МЕБЕЛЬ (СТАВИТСЯ ЛИЦОМ К ТЕБЕ)", fs, RGB(255, 230, 160), 1);
-      int cw = (pw - fs * 2) / 3, chh = imin(fs * 16, (ph - fs * 26) / ((NFURN + 1) / 3) - fs);
-      for (int i = 1; i < NFURN; i++) { int cx = x0 + ((i - 1) % 3) * (cw + fs), cy = y0 + fs * 12 + ((i - 1) / 3) * (chh + fs); fmtR(m, sizeof m, FURN[i].price);
+      int tw = (pw - fs * 4) / NSTYLE;
+      for (int t = 0; t < NSTYLE; t++) if (ub(x0 + t * (tw + fs), y0 + fs * 11, tw, fs * 10, STYLEN[t], true, furnTab == t ? mixc(STYLEC[t], RGB(255, 255, 255), 0.15f) : mixc(STYLEC[t], RGB(30, 34, 44), 0.6f))) { furnTab = t; furnPage = 0; }
+      int ids[NFURN], nn = 0; for (int i = 1; i < NFURN; i++) if (!FURN[i].old && FURN[i].style == furnTab) ids[nn++] = i;
+      const int PER = 16; int pages = (nn + PER - 1) / PER; furnPage = imax(0, imin(furnPage, pages - 1));
+      int cols = 4, rows = 4, cw = (pw - fs * 3) / cols, chh = imin(fs * 18, (ph - fs * 52) / rows - fs);
+      if (pages > 1) { int by = y0 + fs * 24 + rows * (chh + fs) + fs; char pg[32]; snprintf(pg, sizeof pg, "СТР. %d ИЗ %d", furnPage + 1, pages); drawText(IW / 2, by + fs * 3, pg, fs, RGB(220, 225, 240), 1);
+        if (ub(x0, by, fs * 40, fs * 11, "< НАЗАД", furnPage > 0, RGB(70, 80, 110))) furnPage--; if (ub(x0 + pw - fs * 40, by, fs * 40, fs * 11, "ДАЛЬШЕ >", furnPage < pages - 1, RGB(70, 80, 110))) furnPage++; }
+      for (int q = furnPage * PER; q < nn && q < (furnPage + 1) * PER; q++) { int qq = q - furnPage * PER, i = ids[q], cx = x0 + (qq % cols) * (cw + fs), cy = y0 + fs * 24 + (qq / cols) * (chh + fs); fmtR(m, sizeof m, FURN[i].price);
         snprintf(b, sizeof b, "%s\n%s", FURN[i].name, m); if (ub(cx, cy, cw, chh, b, true, furnSel == i ? RGB(200, 140, 50) : RGB(60, 66, 80))) { furnSel = i; showPick = false; } } }
     if (ub(IW / 2 - fs * 30, y0 + ph - fs * 12, fs * 60, fs * 11, "ЗАКРЫТЬ", true, RGB(80, 86, 110))) showPick = false;
   }
@@ -1873,21 +2457,53 @@ static void frameFlat(float dt) {
   if (showTasks) {
     int pw = imin(IW - fs * 10, fs * 230), x0 = IW / 2 - pw / 2, y0 = IH / 8; fillRectA(x0 - fs * 3, y0 - fs * 3, pw + fs * 6, IH * 3 / 4 + fs * 6, RGB(14, 18, 26), 235);
     drawText(IW / 2, y0, "ЧТО ОСТАЛОСЬ СДЕЛАТЬ", fs + 1, RGB(255, 230, 160), 1); int y = y0 + fs * 14;
-    struct { const char *n; int left, all; } T[7] = {{"ВЫНЕСТИ МУСОР", pr.trashLeft, pr.trashAll}, {"ОТМЫТЬ ПЯТНА", pr.stains, pr.stainsAll}, {"СОДРАТЬ СТАРЫЕ ОБОИ", pr.paper, pr.wallsAll}, {"ЗАШПАКЛЕВАТЬ ТРЕЩИНЫ", pr.unputty, pr.wallsAll}, {"ПОКРАСИТЬ ИЛИ ПОКЛЕИТЬ ОБОИ", pr.unpainted, pr.wallsAll}, {"НОВЫЙ ПОЛ (ПЛИТКА НА КУХНЕ И В ВАННОЙ)", pr.floorsOld, pr.floorsAll}, {"НУЖНАЯ МЕБЕЛЬ (ДИВАН/КРОВАТЬ, ХОЛОДИЛЬНИК, ПЛИТА, ВАННА, РАКОВИНА, УНИТАЗ)", pr.furnNeed - pr.furnOk, pr.furnNeed}};
-    for (int i = 0; i < 7; i++) { char tb[256]; snprintf(tb, sizeof tb, "%s: %s", T[i].n, T[i].left ? "" : "ГОТОВО"); char cnt[32]; if (T[i].left) { snprintf(cnt, sizeof cnt, "ОСТАЛОСЬ %d", T[i].left); strncat(tb, cnt, sizeof tb - strlen(tb) - 1); } char *b = tb;
-      int sc = fs; while (sc > 1 && textW(b, sc) > pw - fs * 10) sc--; fillRect(x0, y + fs, fs * 4, fs * 4, T[i].left ? RGB(220, 120, 60) : RGB(80, 200, 100)); drawText(x0 + fs * 7, y, b, sc, RGB(230, 230, 235), 0); y += fs * 9; }
-    y += fs * 4; fmtR(m, sizeof m, flatBuy); char sp2[32]; fmtR(sp2, sizeof sp2, spent); snprintf(b, sizeof b, "КУПЛЕНА ЗА %s, ПОТРАЧЕНО НА РЕМОНТ %s", m, sp2); drawText(IW / 2, y, b, fs, RGB(200, 200, 210), 1); y += fs * 10;
-    int sale = salePrice(); fmtR(m, sizeof m, sale); char pf[32]; fmtR(pf, sizeof pf, sale - flatBuy - spent); snprintf(b, sizeof b, "РИЕЛТОР ДАСТ: %s (ПРИБЫЛЬ %s)", m, pf); drawText(IW / 2, y, b, fs + 1, sale - flatBuy - spent >= 0 ? RGB(130, 240, 130) : RGB(255, 130, 110), 1); y += fs * 14;
-    if (ub(x0, y, pw / 2 - fs, fs * 13, "ПРОДАТЬ КВАРТИРУ", true, RGB(60, 150, 70))) { showTasks = false; sellFlat(); }
+    struct { const char *n; int left, all; } T[8] = {{flatCond == CO_BARE ? "ВЫНЕСТИ СТРОИТЕЛЬНЫЙ МУСОР" : "ВЫНЕСТИ МУСОР", pr.trashLeft, pr.trashAll},
+      {flatCond == CO_FIRE ? "ОТМЫТЬ ГАРЬ И ПЯТНА" : flatCond == CO_FLOOD ? "СОБРАТЬ ЛУЖИ И ОТМЫТЬ ПЯТНА" : "ОТМЫТЬ ПЯТНА", pr.stains, pr.stainsAll},
+      {flatCond == CO_FIRE ? "СОДРАТЬ ОБГОРЕВШИЕ ОБОИ" : flatCond == CO_FLOOD ? "СОДРАТЬ ОБОИ С ПЛЕСЕНЬЮ" : "СОДРАТЬ СТАРЫЕ ОБОИ", pr.paper, pr.wallsAll},
+      {flatCond == CO_BARE ? "ЗАШПАКЛЕВАТЬ БЕТОН" : "ЗАШПАКЛЕВАТЬ ТРЕЩИНЫ", pr.unputty, pr.wallsAll}, {"ПОКРАСИТЬ ИЛИ ПОКЛЕИТЬ ОБОИ", pr.unpainted, pr.wallsAll},
+      {flatCond == CO_FIRE ? "ЗАМЕНИТЬ ОБГОРЕВШИЙ ПОЛ" : flatCond == CO_FLOOD ? "ЗАМЕНИТЬ ВЗДУТЫЙ ПОЛ" : flatCond == CO_BARE ? "ПОЛОЖИТЬ ПОЛ НА СТЯЖКУ" : "НОВЫЙ ПОЛ", pr.floorsOld, pr.floorsAll},
+      {"НУЖНАЯ МЕБЕЛЬ (ДИВАН/КРОВАТЬ, ХОЛОДИЛЬНИК, ПЛИТА, ВАННА, РАКОВИНА, УНИТАЗ)", pr.furnNeed - pr.furnOk, pr.furnNeed},
+      {"ВЫНЕСТИ СТАРУЮ МЕБЕЛЬ (РУКАМИ)", pr.oldLeft, pr.oldAll}};
+    int nT = pr.oldAll ? 8 : 7;
+    for (int i = 0; i < nT; i++) { if (i == 2 && flatCond == CO_BARE) continue; char tb[256]; snprintf(tb, sizeof tb, "%s: %s", T[i].n, T[i].left ? "" : "ГОТОВО"); char cnt[32]; if (T[i].left) { snprintf(cnt, sizeof cnt, "ОСТАЛОСЬ %d", T[i].left); strncat(tb, cnt, sizeof tb - strlen(tb) - 1); } char *b = tb;
+      int sc = fs; while (sc > 1 && textW(b, sc) > pw - fs * 10) sc--; fillRect(x0, y + fs, fs * 4, fs * 4, T[i].left ? RGB(220, 120, 60) : RGB(80, 200, 100)); drawText(x0 + fs * 7, y, b, sc, RGB(230, 230, 235), 0); y += fs * 8; }
+    { StyleInfo si = styleInfo(); if (si.best) { int bon = (int)(styleBonus(si) * pr.k * 100 + 0.5f); snprintf(b, sizeof b, "СТИЛЬ: %s %d%%%s", STYLEN[si.best], (int)(si.unity * 100), bon ? "" : " (ДЛЯ НАДБАВКИ НУЖНО БОЛЬШЕ 45%)");
+        if (bon) { char t2[32]; snprintf(t2, sizeof t2, " (+%d%% К ЦЕНЕ)", bon); strncat(b, t2, sizeof b - strlen(b) - 1); } }
+      else snprintf(b, sizeof b, "СТИЛЬ: НЕТ (ОТДЕЛКА И МЕБЕЛЬ ОДНОГО СТИЛЯ ДАЮТ НАДБАВКУ)");
+      int sc = fs; while (sc > 1 && textW(b, sc) > pw) sc--; drawText(IW / 2, y + fs, b, sc, si.best ? STYLEC[si.best] : RGB(170, 170, 180), 1); y += fs * 9; } fmtR(m, sizeof m, flatBuy); char sp2[32]; fmtR(sp2, sizeof sp2, spent); snprintf(b, sizeof b, "КУПЛЕНА ЗА %s, ПОТРАЧЕНО НА РЕМОНТ %s", m, sp2); drawText(IW / 2, y, b, fs, RGB(200, 200, 210), 1); y += fs * 10;
+    int sale = salePrice(); fmtR(m, sizeof m, sale); char pf[32]; fmtR(pf, sizeof pf, sale - flatBuy - spent); snprintf(b, sizeof b, "РЫНОЧНАЯ ЦЕНА: %s (ПРИБЫЛЬ %s)", m, pf); drawText(IW / 2, y, b, fs + 1, sale - flatBuy - spent >= 0 ? RGB(130, 240, 130) : RGB(255, 130, 110), 1); y += fs * 14;
+    if (ub(x0, y, pw / 2 - fs, fs * 13, "К ПОКУПАТЕЛЯМ", true, RGB(60, 150, 70))) { showTasks = false; showBuyers = true; }
     if (ub(x0 + pw / 2 + fs, y, pw / 2 - fs, fs * 13, "РАБОТАТЬ ДАЛЬШЕ", true, RGB(80, 86, 110))) showTasks = false;
   }
-  if (msgT > 0) { int sc = fs; while (sc > 1 && textW(msg, sc) > IW - fs * 10) sc--; int w = textW(msg, sc) + fs * 8; fillRectA(IW / 2 - w / 2, fs * 26, w, fs * 11, RGB(0, 0, 0), 170); drawText(IW / 2, fs * 29, msg, sc, RGB(255, 255, 255), 1); }
+  if (showBuyers) {                                                           // три покупателя: у каждого свои пожелания
+    int pw = IW - fs * 8, x0 = IW / 2 - pw / 2, y0 = fs * 23, ph = IH - fs * 26;
+    Prog p2 = progress(); StyleInfo si = styleInfo(); int cw = (pw - fs * 8) / 3, ch = imin(ph - fs * 28, fs * 92); ph = ch + fs * 30;
+    fillRectA(x0 - fs * 3, y0 - fs * 3, pw + fs * 6, ph + fs * 4, RGB(14, 18, 26), 238); drawText(IW / 2, y0, "ПОКУПАТЕЛИ: ВЫПОЛНИ ПОЖЕЛАНИЯ - ЗАПЛАТЯТ БОЛЬШЕ", fs, RGB(255, 230, 160), 1);
+    for (int i = 0; i < 3; i++) { int bu = buyers[i], cx = x0 + i * (cw + fs * 4), cy = y0 + fs * 10;
+      fillRect(cx, cy, cw, ch, RGB(36, 42, 56)); fillRect(cx, cy, cw, fs * 12, RGB(52, 62, 84));
+      { int sc = fs; while (sc > 1 && textW(BUYERN[bu], sc) > cw - fs * 4) sc--; drawText(cx + cw / 2, cy + fs * 3, BUYERN[bu], sc, RGB(255, 255, 255), 1); }
+      int yy = cy + fs * 18;
+      if (bu == BU_STUDENT) { drawText(cx + cw / 2, yy, "ПЛАТИТ МЕНЬШЕ,", imax(1, fs - 1), RGB(190, 190, 200), 1); drawText(cx + cw / 2, yy + fs * 6, "НО НЕ ПРИДИРАЕТСЯ", imax(1, fs - 1), RGB(190, 190, 200), 1); yy += fs * 14; }
+      for (int w = 0; w < 3; w++) { const Wish &ws = WISHES[bu][w]; bool okw = wishOk(ws, p2, si);
+        fillRect(cx + fs * 3, yy + fs, fs * 4, fs * 4, okw ? RGB(80, 200, 100) : RGB(220, 110, 70));
+        char wt[64]; snprintf(wt, sizeof wt, "%s +%d%%", ws.text, (int)(ws.bonus * 100 + 0.5f)); int sc = fs; while (sc > 1 && textW(wt, sc) > cw - fs * 10) sc--;
+        drawText(cx + fs * 9, yy, wt, sc, okw ? RGB(200, 245, 200) : RGB(235, 215, 200), 0); yy += fs * 11; }
+      int pr2 = buyerPrice(bu), prof = pr2 - flatBuy - spent; fmtR(m, sizeof m, pr2);
+      { int sc = fs + 1; while (sc > 1 && textW(m, sc) > cw - fs * 4) sc--; drawText(cx + cw / 2, cy + ch - fs * 34, m, sc, RGB(150, 240, 150), 1); }
+      char pf2[32]; fmtR(pf2, sizeof pf2, prof); snprintf(b, sizeof b, "ПРИБЫЛЬ %s", pf2);
+      { int sc = fs; while (sc > 1 && textW(b, sc) > cw - fs * 4) sc--; drawText(cx + cw / 2, cy + ch - fs * 21, b, sc, prof >= 0 ? RGB(130, 230, 130) : RGB(255, 130, 110), 1); }
+      if (ub(cx + fs * 3, cy + ch - fs * 14, cw - fs * 6, fs * 12, "ПРОДАТЬ", true, RGB(60, 150, 70))) { showBuyers = false; sellFlat(bu); return; } }
+    if (ub(IW / 2 - fs * 30, y0 + ph - fs * 15, fs * 60, fs * 12, "РАБОТАТЬ ДАЛЬШЕ", true, RGB(80, 86, 110))) showBuyers = false;
+  }
+  if (msgT > 0) { int sc = fs; while (sc > 1 && textW(msg, sc) > IW - fs * 10) sc--; int w = textW(msg, sc) + fs * 8; fillRectA(IW / 2 - w / 2, fs * 31, w, fs * 11, RGB(0, 0, 0), 170); drawText(IW / 2, fs * 34, msg, sc, RGB(255, 255, 255), 1); }
 }
 // ---------- рынок квартир ----------
 static void miniMap(int id, int x0, int y0, int w, int h) {
-  const Layout &L = LAYOUTS[id]; int mx1 = 0, mz1 = 0; for (int z = 0; z < MH; z++) for (int x = 0; x < MW; x++) if (L.rows[z][x] != ' ') { mx1 = imax(mx1, x + 1); mz1 = imax(mz1, z + 1); }
-  int c = imax(1, imin(w / imax(1, mx1), h / imax(1, mz1))); u32 RC[NROOM] = {0, RGB(170, 160, 140), RGB(120, 160, 200), RGB(220, 180, 110), RGB(140, 200, 210)};
-  for (int z = 0; z < MH; z++) for (int x = 0; x < MW; x++) { char ch = L.rows[z][x]; int r = ch == 'H' ? R_HALL : ch == 'L' ? R_LIV : ch == 'K' ? R_KIT : ch == 'B' ? R_BATH : 0; if (r) fillRect(x0 + x * c, y0 + z * c, c - 1, c - 1, RC[r]); }
+  const Layout &L = LAYOUTS[id]; int ax = MW, az = MH, bx = 0, bz = 0;
+  for (int z = 0; z < MH; z++) for (int x = 0; x < MW; x++) if (L.rows[z][x] != ' ') { ax = imin(ax, x); az = imin(az, z); bx = imax(bx, x + 1); bz = imax(bz, z + 1); }
+  int c = imax(1, imin(w / 16, h / 12)); u32 RC[NROOM] = {0, RGB(170, 160, 140), RGB(120, 160, 200), RGB(220, 180, 110), RGB(140, 200, 210)};   // общий масштаб: маленькая квартира и выглядит маленькой
+  int ox = x0 + (w - c * (bx - ax)) / 2, oy = y0 + (h - c * (bz - az)) / 2;                                         // по центру карточки
+  for (int z = az; z < bz; z++) for (int x = ax; x < bx; x++) { char ch = L.rows[z][x]; int r = ch == 'H' ? R_HALL : ch == 'L' ? R_LIV : ch == 'K' ? R_KIT : ch == 'B' ? R_BATH : 0; if (r) fillRect(ox + (x - ax) * c, oy + (z - az) * c, c > 2 ? c - 1 : c, c > 2 ? c - 1 : c, RC[r]); }
 }
 static void frameMarket() {
   fillRect(0, 0, IW, IH, RGB(28, 32, 40)); char b[96], m[32];
@@ -1896,17 +2512,19 @@ static void frameMarket() {
   int cw = (IW - fs * 16) / 3, ch = IH - fs * 50, y0 = fs * 34;
   for (int i = 0; i < 3; i++) { Offer &o = offers[i]; int x0 = fs * 4 + i * (cw + fs * 4);
     fillRect(x0, y0, cw, ch, RGB(40, 46, 58)); drawText(x0 + cw / 2, y0 + fs * 4, LAYOUTS[o.layout].name, fs, RGB(255, 230, 160), 1);
-    miniMap(o.layout, x0 + fs * 6, y0 + fs * 14, cw - fs * 12, ch / 2);
-    fmtR(m, sizeof m, o.price); drawText(x0 + cw / 2, y0 + ch - fs * 30, m, fs + 1, RGB(150, 240, 150), 1);
-    drawText(x0 + cw / 2, y0 + ch - fs * 20, "СОСТОЯНИЕ: УБИТАЯ", fs, RGB(220, 160, 140), 1);
+    snprintf(b, sizeof b, "%s, %s", HOUSEN[o.house], DISTN[o.dist]); { int sc = fs; while (sc > 1 && textW(b, sc) > cw - fs * 4) sc--; drawText(x0 + cw / 2, y0 + fs * 13, b, sc, RGB(190, 200, 220), 1); }
+    miniMap(o.layout, x0 + fs * 6, y0 + fs * 22, cw - fs * 12, imax(fs * 8, ch - fs * 62));
+    fmtR(m, sizeof m, o.price); drawText(x0 + cw / 2, y0 + ch - fs * 37, m, fs + 1, RGB(150, 240, 150), 1);
+    snprintf(b, sizeof b, "%d М2, %d КОМН.  %s", layoutCells(o.layout), layoutRooms(o.layout), CONDN[o.cond]); { int sc = fs; while (sc > 1 && textW(b, sc) > cw - fs * 4) sc--; drawText(x0 + cw / 2, y0 + ch - fs * 24, b, sc, CONDC[o.cond], 1); }
     if (button(x0 + fs * 4, y0 + ch - fs * 14, cw - fs * 8, fs * 12, "КУПИТЬ", money >= o.price, RGB(60, 150, 70))) buyFlat(i); }
   if (msgT > 0) { msgT -= 0.016f; drawText(IW / 2, IH - fs * 8, msg, fs, RGB(255, 200, 160), 1); }
 }
 static void frameSold() {
   fillRect(0, 0, IW, IH, RGB(28, 36, 30)); char b[96], m[32];
   drawTextSh(IW / 2, IH / 6, "КВАРТИРА ПРОДАНА!", fs * 2, RGB(140, 240, 140), 1);
-  fmtR(m, sizeof m, soldPrice); snprintf(b, sizeof b, "ЦЕНА ПРОДАЖИ: %s", m); drawText(IW / 2, IH / 6 + fs * 24, b, fs + 1, RGB(230, 230, 235), 1);
-  fmtR(m, sizeof m, soldProfit); snprintf(b, sizeof b, "ПРИБЫЛЬ: %s", m); drawText(IW / 2, IH / 6 + fs * 38, b, fs + 2, soldProfit >= 0 ? RGB(140, 240, 140) : RGB(255, 130, 110), 1);
+  fmtR(m, sizeof m, soldPrice); snprintf(b, sizeof b, "ЦЕНА ПРОДАЖИ: %s", m); drawText(IW / 2, IH / 6 + fs * 28, b, fs + 1, RGB(230, 230, 235), 1);
+  if (soldBuyer >= 0) { snprintf(b, sizeof b, "ПОКУПАТЕЛЬ: %s", BUYERN[soldBuyer]); drawText(IW / 2, IH / 6 + fs * 18, b, fs, RGB(200, 210, 230), 1); }
+  fmtR(m, sizeof m, soldProfit); snprintf(b, sizeof b, "ПРИБЫЛЬ: %s", m); drawText(IW / 2, IH / 6 + fs * 41, b, fs + 2, soldProfit >= 0 ? RGB(140, 240, 140) : RGB(255, 130, 110), 1);
   if (button(IW / 2 - IW / 6, IH * 3 / 5, IW / 3, IH / 7, "К НОВЫМ КВАРТИРАМ", true, RGB(60, 150, 70))) gs = GS_MARKET;
   if (msgT > 0) { msgT -= 0.016f; drawText(IW / 2, IH - fs * 10, msg, fs, RGB(255, 220, 140), 1); }
 }
@@ -1967,7 +2585,7 @@ int main(int argc, char **argv) {
       switch (ev.type) {
         case SDL_QUIT: running = false; break;
         case SDL_APP_WILLENTERBACKGROUND: case SDL_APP_TERMINATING: case SDL_APP_LOWMEMORY: if (gs == GS_FLAT) saveGame(); break;
-        case SDL_KEYDOWN: if (ev.key.keysym.sym == SDLK_ESCAPE) { if (gs == GS_FLAT && (showPick || showTasks)) { showPick = showTasks = false; } else if (gs == GS_TITLE) running = false; else { saveGame(); gs = GS_TITLE; } } break;
+        case SDL_KEYDOWN: if (ev.key.keysym.sym == SDLK_ESCAPE) { if (gs == GS_FLAT && (showPick || showTasks || showBuyers)) { showPick = showTasks = showBuyers = false; } else if (gs == GS_TITLE) running = false; else { saveGame(); gs = GS_TITLE; } } break;
         case SDL_FINGERDOWN: mapPt((int)(ev.tfinger.x * SW), (int)(ev.tfinger.y * SH), mx, my); fingerDown((long long)ev.tfinger.fingerId, mx, my); break;
         case SDL_FINGERMOTION: mapPt((int)(ev.tfinger.x * SW), (int)(ev.tfinger.y * SH), mx, my); fingerMove((long long)ev.tfinger.fingerId, mx, my); break;
         case SDL_FINGERUP: mapPt((int)(ev.tfinger.x * SW), (int)(ev.tfinger.y * SH), mx, my); fingerUp((long long)ev.tfinger.fingerId, mx, my); break;
